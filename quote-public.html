@@ -56,10 +56,10 @@ h1{
 .mast-meta input::placeholder{color:#a9b7b0}
 
 /* --- 당사자 --- */
-.parties{
-  display:grid;grid-template-columns:1fr 1fr;gap:0;
-  border:2px solid var(--ink);margin:16px 0 0;background:var(--surface);
-}
+.parties{border:2px solid var(--ink);margin:16px 0 0;background:var(--surface)}
+.party-grid{display:grid;grid-template-columns:1fr 1fr;gap:0}
+/* 사업명은 받는 기관의 정보가 아니라 건 자체를 가리키므로 두 칸 위에 걸쳐 둔다. */
+.prow.wide{border-bottom:1px solid var(--ink)}
 .party + .party{border-left:1px solid var(--ink)}
 .party h2{
   margin:0;padding:7px 12px;text-align:center;
@@ -68,11 +68,14 @@ h1{
 }
 .prow{display:flex;align-items:stretch;border-bottom:1px solid var(--rule)}
 .prow:last-child{border-bottom:0}
-.prow > span{
+.prow > span,
+.prow.split .half > span{
   flex:0 0 84px;display:flex;align-items:center;justify-content:center;
   font-size:12px;color:var(--ink2);background:var(--paper);
   border-right:1px solid var(--rule);padding:5px 4px;text-align:center;
+  white-space:nowrap;
 }
+.prow.split .half > span{flex-basis:52px}
 .prow input{
   flex:1 1 auto;min-width:0;font-family:inherit;font-size:14px;color:var(--ink);
   background:none;border:0;padding:6px 10px;
@@ -206,7 +209,7 @@ footer{margin-top:36px;padding-top:14px;border-top:1px solid var(--rule);
   padding:14px 18px;margin:14px 0 0;font-size:13.5px}
 
 @media screen and (max-width:760px){
-  .parties,.terms-grid{grid-template-columns:1fr}
+  .party-grid,.terms-grid{grid-template-columns:1fr}
   .party + .party{border-left:0;border-top:1px solid var(--ink)}
 }
 @media (prefers-reduced-motion:reduce){*{animation:none !important;transition:none !important}}
@@ -227,13 +230,17 @@ footer{margin-top:36px;padding-top:14px;border-top:1px solid var(--rule);
   .mast-meta input::placeholder{color:transparent}
 
   /* 좁은 화면용 규칙이 A4 본문 폭에 걸리지 않도록 위에서 screen 으로 한정했다 */
-  .parties{margin-top:10px;border-width:1.2pt;grid-template-columns:1fr 1fr}
+  .parties{margin-top:10px;border-width:1.2pt}
+  .party-grid{grid-template-columns:1fr 1fr}
+  .prow.wide{border-bottom:.6pt solid #000}
   .party + .party{border-left:.6pt solid #000}
   .party h2{padding:4px 8px;font-size:9pt;border-bottom:.6pt solid #000;
     background:#e6e6e6;-webkit-print-color-adjust:exact;print-color-adjust:exact}
   .prow{border-bottom:.4pt solid #bbb}
-  .prow > span{flex-basis:64px;font-size:8.5pt;padding:3px;background:none;
+  .prow > span,
+  .prow.split .half > span{flex-basis:64px;font-size:8.5pt;padding:3px;background:none;
     border-right:.4pt solid #bbb;color:#000}
+  .prow.split .half > span{flex-basis:40px}
   .prow input{font-size:9.5pt;padding:3px 7px;color:#000}
   .prow input::placeholder{color:transparent}
   .prow .strong{font-size:10pt}
@@ -268,6 +275,8 @@ footer{margin-top:36px;padding-top:14px;border-top:1px solid var(--rule);
     background:#e6e6e6;-webkit-print-color-adjust:exact;print-color-adjust:exact}
   .terms-note textarea{font-size:8.5pt;min-height:0;height:auto;overflow:visible;
     resize:none;color:#000;padding:4px 7px}
+  .terms-note textarea::placeholder,
+  .cell-in::placeholder{color:transparent}   /* 빈 칸은 줄만 남기고 안내 문구는 지운다 */
   .terms-note > span{flex-basis:64px;font-size:8.5pt;background:none;color:#000}
 
   .sign{margin-top:16px;color:#000}
@@ -292,14 +301,16 @@ footer{margin-top:36px;padding-top:14px;border-top:1px solid var(--rule);
 </header>
 
 <section class="parties">
+  <div class="prow wide"><span>사업명</span><input id="gProject" class="strong" placeholder="사업 · 공사명"></div>
+  <div class="party-grid">
   <div class="party">
     <h2>공급받는자</h2>
     <div class="prow"><span>기관명</span><input id="gOrg" class="strong" placeholder="기관명"></div>
     <div class="prow"><span>부서</span><input id="gDept" placeholder="부서"></div>
     <div class="prow"><span>담당자</span><input id="gPerson" placeholder="직위 · 성명"></div>
-    <div class="prow"><span>전화</span><input id="gTel" placeholder="전화 / 팩스"></div>
+    <div class="prow"><span>전화</span><input id="gTel" placeholder="전화"></div>
+    <div class="prow"><span>팩스</span><input id="gFax" placeholder="팩스"></div>
     <div class="prow"><span>주소</span><input id="gAddr" placeholder="기관 주소"></div>
-    <div class="prow"><span>현장</span><input id="gSite" placeholder="의령경찰서 신축현장"></div>
   </div>
   <div class="party">
     <h2>공급자</h2>
@@ -312,6 +323,7 @@ footer{margin-top:36px;padding-top:14px;border-top:1px solid var(--rule);
       <div class="half"><span>종목</span><input id="pItem" placeholder="종목"></div>
     </div>
     <div class="prow"><span>연락처</span><input id="pTel" placeholder="전화 / 팩스 · 담당자"></div>
+  </div>
   </div>
 </section>
 
@@ -416,7 +428,7 @@ footer{margin-top:36px;padding-top:14px;border-top:1px solid var(--rule);
   var elPriceC = document.getElementById("priceCurtain");
   var elResetLines = document.getElementById("resetLines");
 
-  var FIELDS = ["gOrg", "gDept", "gPerson", "gTel", "gAddr", "gSite", "gNotice",
+  var FIELDS = ["gProject", "gOrg", "gDept", "gPerson", "gTel", "gFax", "gAddr", "gNotice",
     "pBizNo", "pCo", "pCeo", "pAddr", "pBiz", "pItem", "pTel",
     "cValid", "cDue", "cPlace", "cPay", "cWarranty", "cDeliver", "cNotes",
     "qDate", "qNo"];
@@ -597,8 +609,8 @@ footer{margin-top:36px;padding-top:14px;border-top:1px solid var(--rule);
       d.value = t.getFullYear() + "-" + ("0" + (t.getMonth() + 1)).slice(-2)
         + "-" + ("0" + t.getDate()).slice(-2);
     }
-    if (!document.getElementById("gSite").value) {
-      document.getElementById("gSite").value = "의령경찰서 신축현장";
+    if (!document.getElementById("gProject").value) {
+      document.getElementById("gProject").value = "의령경찰서 신축현장";
     }
   }
 
