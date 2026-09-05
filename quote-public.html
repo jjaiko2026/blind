@@ -57,7 +57,7 @@ h1{
 
 /* --- 당사자 --- */
 .parties{border:2px solid var(--ink);margin:16px 0 0;background:var(--surface)}
-.party-grid{display:grid;grid-template-columns:1fr 1fr;gap:0}
+.party-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0}
 /* 사업명은 받는 기관의 정보가 아니라 건 자체를 가리키므로 두 칸 위에 걸쳐 둔다. */
 .prow.wide{border-bottom:1px solid var(--ink)}
 .party + .party{border-left:1px solid var(--ink)}
@@ -75,7 +75,7 @@ h1{
   border-right:1px solid var(--rule);padding:5px 4px;text-align:center;
   white-space:nowrap;
 }
-.prow.split .half > span{flex-basis:52px}
+/* 업태·종목 라벨도 사업장 라벨과 같은 폭이라야 세로줄이 이어진다. */
 .prow input{
   flex:1 1 auto;min-width:0;font-family:inherit;font-size:14px;color:var(--ink);
   background:none;border:0;padding:6px 10px;
@@ -178,7 +178,7 @@ tfoot tr.total .sum{font-size:16px}
   margin:0;padding:6px 12px;font-size:12.5px;font-weight:600;letter-spacing:.14em;
   background:var(--band);border-bottom:1px solid var(--ink);
 }
-.terms-grid{display:grid;grid-template-columns:1fr 1fr}
+.terms-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
 .terms-grid .prow{border-bottom:1px solid var(--rule)}
 .terms-grid .prow:nth-child(even){border-left:1px solid var(--rule)}
 .terms-note{display:flex;align-items:stretch;border-top:1px solid var(--rule)}
@@ -231,7 +231,7 @@ footer{margin-top:36px;padding-top:14px;border-top:1px solid var(--rule);
 
   /* 좁은 화면용 규칙이 A4 본문 폭에 걸리지 않도록 위에서 screen 으로 한정했다 */
   .parties{margin-top:10px;border-width:1.2pt}
-  .party-grid{grid-template-columns:1fr 1fr}
+  .party-grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
   .prow.wide{border-bottom:.6pt solid #000}
   .party + .party{border-left:.6pt solid #000}
   .party h2{padding:4px 8px;font-size:9pt;border-bottom:.6pt solid #000;
@@ -240,7 +240,6 @@ footer{margin-top:36px;padding-top:14px;border-top:1px solid var(--rule);
   .prow > span,
   .prow.split .half > span{flex-basis:64px;font-size:8.5pt;padding:3px;background:none;
     border-right:.4pt solid #bbb;color:#000}
-  .prow.split .half > span{flex-basis:40px}
   .prow input{font-size:9.5pt;padding:3px 7px;color:#000}
   .prow input::placeholder{color:transparent}
   .prow .strong{font-size:10pt}
@@ -479,8 +478,7 @@ footer{margin-top:36px;padding-top:14px;border-top:1px solid var(--rule);
     });
 
     html += '</tbody><tfoot>'
-      + '<tr><td class="lab" colspan="4">합 계</td>'
-      + '<td class="sum" id="sumQty">—</td><td class="lab">—</td>'
+      + '<tr><td class="lab" colspan="6">합 계</td>'
       + '<td class="sum" id="sumSupply">—</td><td class="sum" id="sumTax">—</td>'
       + '<td class="lab" id="sumCount">—</td></tr>'
       + '<tr class="total"><td class="lab" colspan="6">합계금액 (공급가액 + 세액)</td>'
@@ -497,7 +495,7 @@ footer{margin-top:36px;padding-top:14px;border-top:1px solid var(--rule);
     if (!trs.length) return;
 
     var taxed = elVat.value === "add";
-    var supplyAll = 0, taxAll = 0, nAll = 0, priced = 0, byUnit = {};
+    var supplyAll = 0, taxAll = 0, nAll = 0, priced = 0;
 
     trs.forEach(function (tr) {
       var qty = parseFloat(tr.getAttribute("data-qty")) || 0;
@@ -507,8 +505,6 @@ footer{margin-top:36px;padding-top:14px;border-top:1px solid var(--rule);
       var tax = taxed ? Math.round(supply * 0.1) : 0;
 
       supplyAll += supply; taxAll += tax;
-      byUnit[tr.getAttribute("data-unit") || "㎡"] =
-        (byUnit[tr.getAttribute("data-unit") || "㎡"] || 0) + qty;
       nAll += parseInt(tr.getAttribute("data-n"), 10) || 0;
       if (unit) priced++;
 
@@ -522,7 +518,6 @@ footer{margin-top:36px;padding-top:14px;border-top:1px solid var(--rule);
       var el = document.getElementById(id);
       if (el) el.textContent = text;
     }
-    put("sumQty", L.qtySummary(byUnit));
     put("sumCount", nAll + "건");
     put("sumSupply", L.money(supplyAll));
     put("sumTax", L.money(taxAll));
@@ -531,10 +526,9 @@ footer{margin-top:36px;padding-top:14px;border-top:1px solid var(--rule);
     elGrandHan.textContent = "일금 " + L.hangulAmount(total) + "원정";
     elGrandNum.textContent = L.won(total);
     elGrandNote.textContent = priced
-      ? "총 " + L.qtySummary(byUnit) + " · " + nAll + "건 · "
-        + (taxed ? "부가가치세 별도 표기 (공급가액 " + L.money(supplyAll)
-          + "원 + 세액 " + L.money(taxAll) + "원)" : "면세")
-      : "단가를 넣으면 금액이 계산됩니다 · 총 " + L.qtySummary(byUnit) + " · " + nAll + "건";
+      ? nAll + "건 · " + (taxed ? "부가가치세 별도 표기 (공급가액 " + L.money(supplyAll)
+        + "원 + 세액 " + L.money(taxAll) + "원)" : "면세")
+      : "단가를 넣으면 금액이 계산됩니다 · " + nAll + "건";
 
     elBaseNote.textContent = L.baseNote(base);
   }

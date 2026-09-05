@@ -197,17 +197,6 @@
   // 그 줄에 실제로 값을 매기는 수량 — 커튼은 건수, 블라인드는 헤베.
   function billQty(e) { return unitOf(e.prod) === "개" ? e.n : e.qty; }
 
-  function qtyText(value, unit) {
-    return (unit === "개" ? String(Math.round(value)) : num(value)) + " " + unit;
-  }
-
-  // 단위가 섞이므로 합계는 단위별로 따로 적는다.
-  function qtySummary(byUnit) {
-    return Object.keys(byUnit).map(function (u) {
-      return qtyText(byUnit[u], u);
-    }).join("  ·  ") || "—";
-  }
-
   function specOf(e, mode) {
     if (mode === "prod") return "전 구역";
     if (mode === "spec") return e.dim;
@@ -228,6 +217,6 @@
     parseDim: parseDim, guessProd: guessProd, prodKind: prodKind,
     readBase: readBase, load: load,
     usedArea: usedArea, aggregate: aggregate, specOf: specOf, baseNote: baseNote,
-    unitOf: unitOf, qtyText: qtyText, qtySummary: qtySummary
+    unitOf: unitOf
   };
 })(window);

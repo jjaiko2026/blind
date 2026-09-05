@@ -451,9 +451,8 @@ footer{margin-top:40px;padding-top:14px;border-top:1px solid var(--rule);
     });
 
     html += '</tbody><tfoot>'
-      + '<tr><td class="lab" colspan="3">수량 합계</td>'
-      + '<td class="sum" id="sumQty">—</td>'
-      + '<td class="lab" colspan="2" id="sumCount">—</td></tr>'
+      + '<tr><td class="lab" colspan="5">합 계</td>'
+      + '<td class="sum" id="sumCount">—</td></tr>'
       + '<tr><td class="lab" colspan="5">공급가액</td><td class="sum" id="sumNetto">—</td></tr>'
       + '<tr id="taxRow"><td class="lab" colspan="5" id="taxLab">부가가치세</td>'
       + '<td class="sum" id="sumTax">—</td></tr>'
@@ -470,15 +469,13 @@ footer{margin-top:40px;padding-top:14px;border-top:1px solid var(--rule);
     var trs = elSpec.querySelectorAll("tbody tr");
     if (!trs.length) return;
 
-    var supply = 0, nAll = 0, priced = 0, byUnit = {};
+    var supply = 0, nAll = 0, priced = 0;
     trs.forEach(function (tr) {
       var qty = parseFloat(tr.getAttribute("data-qty")) || 0;
       var v = L.priceValue(tr.querySelector("input.price").value);
       var unit = isFinite(v) && v > 0 ? v : 0;
       var amount = Math.round(qty * unit);   // 줄마다 원 단위로 끊어야 줄의 합이 공급가액과 맞는다
       supply += amount;
-      var u = tr.getAttribute("data-unit") || "㎡";
-      byUnit[u] = (byUnit[u] || 0) + qty;
       nAll += parseInt(tr.getAttribute("data-n"), 10) || 0;
       if (unit) priced++;
       tr.querySelector(".c-amt").textContent = unit ? amount.toLocaleString("ko-KR") : "—";
@@ -493,7 +490,6 @@ footer{margin-top:40px;padding-top:14px;border-top:1px solid var(--rule);
       var el = document.getElementById(id);
       if (el) el.textContent = text;
     }
-    put("sumQty", L.qtySummary(byUnit));
     put("sumCount", nAll + "건");
     put("sumNetto", netto.toLocaleString("ko-KR"));
     put("sumTax", tax.toLocaleString("ko-KR"));
@@ -505,9 +501,9 @@ footer{margin-top:40px;padding-top:14px;border-top:1px solid var(--rule);
     elGrandHan.textContent = "일금 " + L.hangulAmount(total) + "원정";
     elGrandNum.textContent = L.won(total);
     elGrandNote.textContent = priced
-      ? "총 " + L.qtySummary(byUnit) + " · " + nAll + "건 · "
+      ? nAll + "건 · "
         + (vat === "in" ? "부가세 포함" : vat === "none" ? "부가세 없음" : "부가세 별도")
-      : "단가를 넣으면 금액이 계산됩니다 · 총 " + L.qtySummary(byUnit) + " · " + nAll + "건";
+      : "단가를 넣으면 금액이 계산됩니다 · " + nAll + "건";
 
     elBasisBase.textContent = L.baseNote(base);
   }
