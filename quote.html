@@ -429,9 +429,9 @@ footer{margin-top:40px;padding-top:14px;border-top:1px solid var(--rule);
   }
 
   /* ---- 대장 읽기 ---- */
-  // 헤베는 둘째 자리에서 올린다. 부동소수 오차로 3.05가 3.06이 되지 않도록
-  // 아주 작은 값을 먼저 덜어낸다 (실측에서 나올 수 있는 자릿수보다 훨씬 작다).
-  function ceil2(n) { return Math.ceil(n * 100 - 1e-9) / 100; }
+  // 헤베는 소수 둘째 자리에서 올려 첫째 자리까지 남긴다 (3.53 → 3.6, 표기는 3.60).
+  // 부동소수 오차로 3.50이 3.60이 되지 않도록 아주 작은 값을 먼저 덜어낸다.
+  function ceilArea(n) { return Math.ceil(n * 10 - 1e-9) / 10; }
 
   function parseDim(text) {
     var m = /^([0-9]+(?:\.[0-9]+)?)\s*[×xX*]\s*([0-9]+(?:\.[0-9]+)?)$/
@@ -488,7 +488,7 @@ footer{margin-top:40px;padding-top:14px;border-top:1px solid var(--rule);
 
           out.push({
             floor: floorName, group: groupName, loc: loc, dim: dim, rem: rem,
-            prod: prod, raw: ceil2(d.w * d.h / 10000)
+            prod: prod, raw: ceilArea(d.w * d.h / 10000)
           });
         });
       });

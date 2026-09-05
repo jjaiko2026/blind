@@ -1321,13 +1321,13 @@ tr.based .area .a-use{color:var(--clay)}
     return m ? { w: parseFloat(m[1]), h: parseFloat(m[2]) } : null;
   }
 
-  // 헤베는 둘째 자리에서 올린다. 부동소수 오차로 3.05가 3.06이 되지 않도록
-  // 아주 작은 값을 먼저 덜어낸다 (실측에서 나올 수 있는 자릿수보다 훨씬 작다).
-  function ceil2(n) { return Math.ceil(n * 100 - 1e-9) / 100; }
+  // 헤베는 소수 둘째 자리에서 올려 첫째 자리까지 남긴다 (3.53 → 3.6, 표기는 3.60).
+  // 부동소수 오차로 3.50이 3.60이 되지 않도록 아주 작은 값을 먼저 덜어낸다.
+  function ceilArea(n) { return Math.ceil(n * 10 - 1e-9) / 10; }
 
   function rawAreaOf(entry) {
     var d = parseDim(entry.dim ? entry.dim.textContent : "");
-    return d ? ceil2(d.w * d.h / 10000) : null;
+    return d ? ceilArea(d.w * d.h / 10000) : null;
   }
 
   function prodTextOf(td) {
