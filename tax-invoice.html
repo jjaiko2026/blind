@@ -1,0 +1,629 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>의령경찰서 창호 세금계산서</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@700&family=IBM+Plex+Sans+KR:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* 세금계산서 — A4 한 장에 공급받는자 보관용(위) · 공급자 보관용(아래) 두 부. */
+:root{
+  color-scheme:light;
+  --paper:#f3f5f1;
+  --surface:#ffffff;
+  --band:#e7ebe4;
+  --ink:#0e171d;
+  --ink2:#37474f;
+  --ink3:#566870;
+  --rule:#d3dbd2;
+  --rule2:#aebab1;
+  --pine:#14563f;
+  --flag:#8d2c1c;
+}
+
+*{box-sizing:border-box}
+body{
+  background:var(--paper);color:var(--ink);
+  font-family:"IBM Plex Sans KR","Malgun Gothic","맑은 고딕",system-ui,sans-serif;
+  font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1000px;margin:0 auto;padding:0 20px 80px}
+
+/* --- 조작부 (화면 전용) --- */
+.panel{border:1px solid var(--rule);background:var(--surface);padding:14px 16px;margin:30px 0 22px}
+.panel h2{margin:0 0 12px;font-size:13px;font-weight:600;letter-spacing:.06em;color:var(--ink2)}
+.panel-row{display:flex;gap:20px;align-items:center;flex-wrap:wrap}
+.panel-row + .panel-row{margin-top:12px;padding-top:12px;border-top:1px dashed var(--rule)}
+.panel label{display:flex;align-items:center;gap:7px;font-size:13px;color:var(--ink2)}
+.panel input[type=number]{
+  font-family:"IBM Plex Mono",monospace;font-size:14px;font-variant-numeric:tabular-nums;
+  width:104px;padding:4px 8px;border:1px solid var(--rule2);border-radius:2px;
+  background:var(--paper);color:var(--ink);text-align:right;
+}
+.panel input[type=date],.panel select{
+  font-family:inherit;font-size:13px;padding:4px 8px;
+  border:1px solid var(--rule2);border-radius:2px;background:var(--paper);color:var(--ink);
+}
+.panel input:focus-visible,.panel select:focus-visible{outline:2px solid var(--pine);outline-offset:1px}
+.hint{font-size:12px;color:var(--ink3)}
+.btn{font-family:inherit;font-size:12.5px;color:var(--ink2);background:none;
+  border:1px solid var(--rule2);padding:4px 12px;border-radius:2px;cursor:pointer;
+  text-decoration:none;display:inline-block}
+.btn:hover{border-color:var(--flag);color:var(--flag)}
+.btn:focus-visible{outline:2px solid var(--pine);outline-offset:1px}
+.acts{display:flex;gap:12px;flex-wrap:wrap;margin-left:auto}
+
+/* --- 계산서 한 부 --- */
+.copy{background:var(--surface);border:2px solid var(--ink);padding:0;margin:0 0 26px}
+.copy-head{display:flex;align-items:center;gap:14px;padding:8px 12px;border-bottom:2px solid var(--ink)}
+.copy-title{
+  font-family:"Gowun Batang","Batang",serif;font-weight:700;
+  font-size:23px;letter-spacing:.26em;text-indent:.26em;flex:1 1 auto;text-align:center;
+}
+.copy-label{
+  font-size:12px;font-weight:600;border:1px solid var(--ink);border-radius:2px;
+  padding:3px 9px;white-space:nowrap;
+}
+.copy-serial{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--ink3);white-space:nowrap}
+
+table.form{width:100%;border-collapse:collapse;table-layout:fixed}
+table.form th,table.form td{border:1px solid var(--rule2);padding:0;vertical-align:middle}
+.side{
+  width:26px;background:var(--band);text-align:center;font-size:11.5px;font-weight:600;
+  letter-spacing:.02em;line-height:1.25;color:var(--ink2);padding:4px 2px;
+}
+.lab{
+  background:var(--paper);text-align:center;font-size:11.5px;color:var(--ink2);
+  padding:4px 3px;white-space:nowrap;
+}
+.val{padding:0}
+.val input{
+  width:100%;font-family:inherit;font-size:13px;color:var(--ink);
+  background:none;border:0;padding:5px 8px;
+}
+.val input:hover{background:var(--band)}
+.val input:focus{outline:0;background:var(--paper);box-shadow:inset 0 -2px 0 var(--pine)}
+.val input::placeholder{color:#a9b7b0}
+.val .mirror{display:block;padding:5px 8px;font-size:13px;min-height:26px}
+.val.mono input,.val.mono .mirror{
+  font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;letter-spacing:.02em;
+}
+.val.seal{position:relative}
+.val.seal::after{
+  content:"(인)";position:absolute;right:7px;top:50%;transform:translateY(-50%);
+  font-size:10.5px;color:var(--ink3);pointer-events:none;
+}
+.val.seal input,.val.seal .mirror{padding-right:34px}
+
+/* 작성 · 공급가액 · 세액 띠 */
+.strip th{background:var(--band);font-size:11.5px;font-weight:600;color:var(--ink2);padding:4px 3px}
+.strip td{font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;
+  text-align:right;padding:5px 9px;font-size:14px;font-weight:600}
+.strip td.note{text-align:left;font-weight:400;font-size:12.5px;padding:0}
+
+/* 품목 */
+table.items{width:100%;border-collapse:collapse;table-layout:fixed}
+table.items th{
+  background:var(--band);font-size:11.5px;font-weight:600;color:var(--ink2);
+  border:1px solid var(--rule2);padding:4px 3px;text-align:center;
+}
+table.items td{border:1px solid var(--rule2);padding:0;height:25px}
+table.items .u{font-size:11px;color:var(--ink3);margin-left:3px}
+table.items .c-md{text-align:center;font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--ink3)}
+table.items .c-num{
+  font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;
+  text-align:right;padding:3px 8px;font-size:13px;white-space:nowrap;
+}
+table.items .c-supply{font-weight:600}
+table.items .cell-in{
+  width:100%;display:block;font-family:inherit;font-size:13px;color:inherit;
+  background:none;border:0;padding:3px 8px;line-height:1.4;
+}
+table.items .cell-in.num{
+  font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;text-align:right;
+}
+table.items .cell-in:hover{background:var(--band)}
+table.items .cell-in:focus{outline:0;background:var(--paper);box-shadow:inset 0 -2px 0 var(--pine)}
+table.items .mirror{display:block;padding:3px 8px;font-size:13px;min-height:22px}
+table.items .mirror.num{
+  font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;text-align:right;
+}
+
+/* 합계 띠 */
+table.tail{width:100%;border-collapse:collapse;table-layout:fixed}
+table.tail th{background:var(--band);font-size:11.5px;font-weight:600;color:var(--ink2);
+  border:1px solid var(--rule2);padding:4px 3px;text-align:center}
+table.tail td{border:1px solid var(--rule2);padding:0}
+table.tail .c-num{font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;
+  text-align:right;padding:5px 8px;font-size:13.5px;font-weight:600}
+table.tail .receipt{text-align:center;font-size:12px;padding:5px 6px;color:var(--ink2)}
+table.tail .receipt b{color:var(--ink)}
+table.tail input{width:100%;font-family:"IBM Plex Mono",monospace;font-size:13px;
+  text-align:right;background:none;border:0;padding:5px 8px;color:var(--ink)}
+table.tail input:hover{background:var(--band)}
+table.tail input:focus{outline:0;background:var(--paper);box-shadow:inset 0 -2px 0 var(--pine)}
+table.tail .mirror{display:block;padding:5px 8px;font-size:13px;text-align:right;
+  font-family:"IBM Plex Mono",monospace;min-height:26px}
+
+.cut{
+  display:flex;align-items:center;gap:10px;margin:0 0 26px;
+  font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--ink3);
+}
+.cut::before,.cut::after{content:"";flex:1 1 auto;border-top:1px dashed var(--rule2)}
+
+footer{margin-top:30px;padding-top:14px;border-top:1px solid var(--rule);
+  font-family:"IBM Plex Mono",monospace;font-size:11.5px;color:var(--ink3);
+  display:flex;gap:16px;flex-wrap:wrap}
+.error{border:1px solid var(--flag);background:#fbeeeb;color:var(--flag);
+  padding:14px 18px;margin:14px 0;font-size:13.5px}
+
+@media (prefers-reduced-motion:reduce){*{animation:none !important;transition:none !important}}
+
+/* --- 인쇄: A4 한 장에 두 부 --- */
+@media print{
+  @page{size:A4 portrait;margin:10mm 9mm}
+  html,body{background:#fff}
+  body{font-size:9pt;line-height:1.25;color:#000}
+  .wrap{max-width:none;padding:0}
+  .panel,.acts,footer,.hint{display:none !important}
+
+  .copy{margin:0;border-width:1.2pt;break-inside:avoid;page-break-inside:avoid}
+  .copy-head{padding:5px 9px;border-bottom:1.2pt solid #000}
+  .copy-title{font-size:17pt}
+  .copy-label{font-size:8.5pt;padding:2px 7px;border:.6pt solid #000}
+  .copy-serial{font-size:7.5pt;color:#333}
+
+  table.form th,table.form td,table.items th,table.items td,
+  table.tail th,table.tail td{border:.4pt solid #666}
+  .side{width:20px;font-size:8.5pt;padding:3px 1px;color:#000;background:#ececec;
+    -webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .lab,.strip th,table.items th,table.tail th{font-size:8pt;padding:2.5px 2px;color:#000;
+    background:#ececec;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .val input,.val .mirror{font-size:9pt;padding:3px 6px;color:#000;min-height:0}
+  .val.seal::after{font-size:7.5pt;right:5px}
+  .val.seal input,.val.seal .mirror{padding-right:26px}
+  .strip td{font-size:10pt;padding:3px 7px}
+  .strip td.note{font-size:8.5pt}
+
+  table.items td{height:auto}
+  table.items .cell-in,table.items .mirror{font-size:8.5pt;padding:2px 6px;min-height:0}
+  table.items .c-num{font-size:8.5pt;padding:2px 6px}
+  table.items .u{font-size:7.5pt;color:#333}
+  table.items .c-md{font-size:8pt}
+  table.tail .c-num,table.tail input,table.tail .mirror{font-size:9pt;padding:3px 6px;min-height:0}
+  table.tail .receipt{font-size:8.5pt;padding:3px 4px;color:#000}
+
+  input::placeholder{color:transparent}   /* 빈 칸은 줄만 남긴다 */
+  input:hover,input:focus{background:none !important;box-shadow:none !important}
+
+  /* 두 부 사이는 자르는 선 하나로 */
+  .cut{margin:5mm 0;font-size:7pt;color:#555}
+  .cut::before,.cut::after{border-top:.4pt dashed #999}
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+<section class="panel">
+  <h2>작성 설정 <span class="hint">— 이 칸은 인쇄되지 않습니다</span></h2>
+  <div class="panel-row">
+    <label>작성일자 <input type="date" id="tDate"></label>
+    <label>블라인드 단가 <input type="number" id="priceBlind" min="0" step="1000" value="0" inputmode="numeric"> 원/㎡</label>
+    <label>커튼 단가 <input type="number" id="priceCurtain" min="0" step="1000" value="0" inputmode="numeric"> 원/개</label>
+    <label>품목 단위
+      <select id="modeSel">
+        <option value="prod">품명별</option>
+        <option value="floor">층 · 품명별</option>
+        <option value="group">구역 · 품명별</option>
+      </select>
+    </label>
+  </div>
+  <div class="panel-row">
+    <label>영수 / 청구
+      <select id="receiptSel">
+        <option value="청구">청구</option>
+        <option value="영수">영수</option>
+      </select>
+    </label>
+    <span class="hint">품목 줄이 6줄을 넘으면 마지막 줄에 "외 N건"으로 묶습니다</span>
+    <span class="acts">
+      <a class="btn" href="./index.html">실측대장</a>
+      <a class="btn" href="./quote.html">자사 견적서</a>
+      <a class="btn" href="./quote-public.html">공공기관용 견적서</a>
+      <button type="button" class="btn" id="printBtn">인쇄 · PDF로 저장</button>
+    </span>
+  </div>
+</section>
+
+<div id="copy1" class="copy">
+  <div class="copy-head">
+    <span class="copy-label">공급받는자 보관용</span>
+    <span class="copy-title">세금계산서</span>
+    <span class="copy-serial">책번호 &nbsp;&nbsp; 권 &nbsp;&nbsp; 호 &nbsp;·&nbsp; 일련번호</span>
+  </div>
+
+  <table class="form">
+    <colgroup>
+      <col style="width:26px"><col style="width:66px"><col style="width:24%">
+      <col style="width:26px"><col style="width:66px"><col>
+    </colgroup>
+    <tbody>
+      <tr>
+        <td class="side" rowspan="4">공<br>급<br>자</td>
+        <td class="lab">등록번호</td>
+        <td class="val mono"><input id="sBizNo" placeholder="000-00-00000"></td>
+        <td class="side" rowspan="4">공<br>급<br>받<br>는<br>자</td>
+        <td class="lab">등록번호</td>
+        <td class="val mono"><input id="bBizNo" placeholder="000-00-00000"></td>
+      </tr>
+      <tr>
+        <td class="lab">상호</td>
+        <td class="val"><input id="sCo" placeholder="상호 (법인명)"></td>
+        <td class="lab">상호</td>
+        <td class="val"><input id="bCo" placeholder="상호 (기관명)"></td>
+      </tr>
+      <tr>
+        <td class="lab">성명</td>
+        <td class="val seal"><input id="sCeo" placeholder="대표자"></td>
+        <td class="lab">성명</td>
+        <td class="val seal"><input id="bCeo" placeholder="대표자"></td>
+      </tr>
+      <tr>
+        <td class="lab">사업장</td>
+        <td class="val"><input id="sAddr" placeholder="사업장 주소"></td>
+        <td class="lab">사업장</td>
+        <td class="val"><input id="bAddr" placeholder="사업장 주소"></td>
+      </tr>
+      <tr>
+        <td class="side">업<br>종</td>
+        <td class="lab">업태</td>
+        <td class="val"><input id="sBiz" placeholder="업태"></td>
+        <td class="side">업<br>종</td>
+        <td class="lab">업태</td>
+        <td class="val"><input id="bBiz" placeholder="업태"></td>
+      </tr>
+      <tr>
+        <td class="side"></td>
+        <td class="lab">종목</td>
+        <td class="val"><input id="sItem" placeholder="종목"></td>
+        <td class="side"></td>
+        <td class="lab">종목</td>
+        <td class="val"><input id="bItem" placeholder="종목"></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="form strip">
+    <colgroup><col style="width:22%"><col style="width:26%"><col style="width:22%"><col></colgroup>
+    <thead><tr><th>작 성</th><th>공 급 가 액</th><th>세 액</th><th>비 고</th></tr></thead>
+    <tbody><tr>
+      <td id="outDate">—</td>
+      <td id="outSupply">—</td>
+      <td id="outTax">—</td>
+      <td class="note val"><input id="tNote" placeholder="비고"></td>
+    </tr></tbody>
+  </table>
+
+  <table class="items">
+    <colgroup>
+      <col style="width:5%"><col style="width:5%"><col style="width:22%"><col style="width:17%">
+      <col style="width:8%"><col style="width:13%"><col style="width:15%"><col style="width:15%">
+    </colgroup>
+    <thead><tr>
+      <th>월</th><th>일</th><th>품 목</th><th>규 격</th>
+      <th>수량</th><th>단 가</th><th>공급가액</th><th>세 액</th>
+    </tr></thead>
+    <tbody id="itemBody">
+      <tr><td colspan="8" style="padding:14px;text-align:center;color:#8a9a92">실측대장을 읽는 중…</td></tr>
+    </tbody>
+  </table>
+
+  <table class="tail">
+    <colgroup>
+      <col style="width:22%"><col style="width:15%"><col style="width:15%">
+      <col style="width:15%"><col style="width:15%"><col>
+    </colgroup>
+    <thead><tr>
+      <th>합 계 금 액</th><th>현 금</th><th>수 표</th><th>어 음</th><th>외상미수금</th>
+      <th>이 금액을</th>
+    </tr></thead>
+    <tbody><tr>
+      <td class="c-num" id="outTotal">—</td>
+      <td><input id="pCash" placeholder=""></td>
+      <td><input id="pCheck" placeholder=""></td>
+      <td><input id="pNote" placeholder=""></td>
+      <td><input id="pCredit" placeholder=""></td>
+      <td class="receipt"><b id="outReceipt">청구</b>함</td>
+    </tr></tbody>
+  </table>
+</div>
+
+<p class="cut">여기를 자르세요</p>
+
+<div id="copy2" class="copy"></div>
+
+<footer>
+  <span>실측대장에서 자동 집계 · 수량을 고치려면 대장에서 수정하세요</span>
+  <span id="syncNote"></span>
+</footer>
+
+</div>
+
+<script src="./quote-core.js"></script>
+<script>
+(function () {
+  "use strict";
+
+  /* 금액은 견적서와 같은 엔진에서 뽑는다 — 계산서가 견적과 어긋나면 안 된다. */
+  var L = window.Ledger;
+  var STORE = "uiryeong-tax-v1";
+  var QUOTE_PUBLIC = "uiryeong-quote-public-v1";
+  var MAX_ROWS = 6;   // 서식이 A4 절반에 들어가야 하므로 넘치는 품목은 묶는다
+  var MIN_ROWS = 4;   // 줄이 적어도 서식 모양은 지킨다
+
+  var rows = [];
+  var base = L.readBase();
+  var price = { blind: 0, curtain: 0 };
+  var lineOv = {};    // 계산서에서 직접 고친 값
+  var quoteOv = {};   // 공공기관용 견적서에서 고친 값 — 계산서의 기본값이 된다
+
+  var copy1 = document.getElementById("copy1");
+  var copy2 = document.getElementById("copy2");
+  var elBody = document.getElementById("itemBody");
+  var elSync = document.getElementById("syncNote");
+  var elMode = document.getElementById("modeSel");
+  var elReceipt = document.getElementById("receiptSel");
+  var elPriceB = document.getElementById("priceBlind");
+  var elPriceC = document.getElementById("priceCurtain");
+  var elDate = document.getElementById("tDate");
+
+  var FIELDS = ["sBizNo", "sCo", "sCeo", "sAddr", "sBiz", "sItem",
+    "bBizNo", "bCo", "bCeo", "bAddr", "bBiz", "bItem",
+    "tNote", "pCash", "pCheck", "pNote", "pCredit"];
+
+  function ovKey(mode, key) { return mode + "|" + key; }
+
+  // 계산서에서 고친 값이 먼저, 없으면 견적서 값, 그것도 없으면 대장에서 온 값.
+  function pick(e, mode, field, fallback) {
+    var mine = lineOv[ovKey(mode, e.key)] || {};
+    var quoted = quoteOv[ovKey(mode, e.key)] || {};
+    if (Object.prototype.hasOwnProperty.call(mine, field)) return mine[field];
+    if (Object.prototype.hasOwnProperty.call(quoted, field)) return quoted[field];
+    return fallback;
+  }
+
+  function defaultPrice(prod) {
+    return L.unitOf(prod) === "개" ? price.curtain : price.blind;
+  }
+
+  /* ---- 품목 ---- */
+  function render() {
+    if (!rows.length) return;
+
+    var mode = elMode.value;
+    var items = L.aggregate(rows, mode, base);
+    var d = elDate.value ? elDate.value.split("-") : ["", "", ""];
+    var mm = d[1] || "", dd = d[2] || "";
+
+    // 서식 높이가 정해져 있으므로 넘치는 줄은 마지막 한 줄로 묶는다.
+    var shown = items, rest = null;
+    if (items.length > MAX_ROWS) {
+      shown = items.slice(0, MAX_ROWS - 1);
+      rest = items.slice(MAX_ROWS - 1);
+    }
+
+    var html = "";
+    shown.forEach(function (e) {
+      var name = pick(e, mode, "name", e.prod);
+      var spec = pick(e, mode, "spec", L.specOf(e, mode));
+      var ovp = pick(e, mode, "price", undefined);
+      var unit = ovp === undefined ? (defaultPrice(e.prod) || "") : (ovp == null ? "" : ovp);
+
+      html += '<tr data-key="' + L.attr(e.key) + '" data-bill="' + e.bill + '">'
+        + '<td class="c-md">' + L.attr(mm) + '</td><td class="c-md">' + L.attr(dd) + '</td>'
+        + '<td><input class="cell-in nm" value="' + L.attr(name) + '" aria-label="품목"></td>'
+        + '<td><input class="cell-in sp" value="' + L.attr(spec) + '" aria-label="규격"></td>'
+        + '<td class="c-num">' + L.num(e.bill, e.unit === "개" ? 0 : 2)
+        + ' <span class="u">' + e.unit + '</span></td>'
+        + '<td><input class="cell-in num" value="'
+        + L.attr(unit === "" ? "" : Number(unit).toLocaleString("ko-KR")) + '" aria-label="단가"></td>'
+        + '<td class="c-num c-supply">—</td><td class="c-num c-tax">—</td></tr>';
+    });
+
+    if (rest) {
+      var rSupply = 0;
+      rest.forEach(function (e) {
+        var ovp = pick(e, mode, "price", undefined);
+        var u = ovp === undefined ? defaultPrice(e.prod) : (ovp || 0);
+        rSupply += Math.round(e.bill * (u || 0));
+      });
+      html += '<tr data-rest="' + rSupply + '">'
+        + '<td class="c-md">' + L.attr(mm) + '</td><td class="c-md">' + L.attr(dd) + '</td>'
+        + '<td><span class="mirror">외 ' + rest.length + '건</span></td>'
+        + '<td><span class="mirror">별첨 명세 참조</span></td>'
+        + '<td class="c-num">—</td><td><span class="mirror num">—</span></td>'
+        + '<td class="c-num c-supply">—</td><td class="c-num c-tax">—</td></tr>';
+    }
+
+    var used = shown.length + (rest ? 1 : 0);
+    for (var i = used; i < MIN_ROWS; i++) {
+      html += '<tr><td class="c-md"></td><td class="c-md"></td><td></td><td></td>'
+        + '<td class="c-num"></td><td></td><td class="c-num"></td><td class="c-num"></td></tr>';
+    }
+
+    elBody.innerHTML = html;
+    recalcItems();
+  }
+
+  /* ---- 금액만 다시 셈한다 — 표를 다시 그리면 적고 있던 칸에서 손이 떠난다 ---- */
+  function recalcItems() {
+    var supplyAll = 0, taxAll = 0;
+
+    elBody.querySelectorAll("tr").forEach(function (tr) {
+      var supply = null;
+      if (tr.hasAttribute("data-rest")) {
+        supply = parseFloat(tr.getAttribute("data-rest")) || 0;
+      } else if (tr.hasAttribute("data-bill")) {
+        var bill = parseFloat(tr.getAttribute("data-bill")) || 0;
+        var v = L.priceValue(tr.querySelector("input.num").value);
+        supply = Math.round(bill * (isFinite(v) && v > 0 ? v : 0));
+      }
+      if (supply === null) return;
+
+      var tax = Math.round(supply * 0.1);   // 줄마다 원 단위로 끊어야 합이 맞는다
+      supplyAll += supply; taxAll += tax;
+      tr.querySelector(".c-supply").textContent = supply ? L.money(supply) : "—";
+      tr.querySelector(".c-tax").textContent = supply ? L.money(tax) : "—";
+    });
+
+    document.getElementById("outSupply").textContent = L.money(supplyAll);
+    document.getElementById("outTax").textContent = L.money(taxAll);
+    document.getElementById("outTotal").textContent = L.money(supplyAll + taxAll);
+    document.getElementById("outDate").textContent = elDate.value
+      ? elDate.value.replace(/-/g, ". ") + "." : "—";
+    document.getElementById("outReceipt").textContent = elReceipt.value;
+
+    syncCopy();
+  }
+
+  /* ---- 아래 부는 위 부를 그대로 옮겨 찍는다 ---- */
+  function syncCopy() {
+    var clone = copy1.cloneNode(true);
+    var from = copy1.querySelectorAll("input");
+    var to = clone.querySelectorAll("input");
+    for (var i = 0; i < to.length; i++) {
+      var span = document.createElement("span");
+      span.className = "mirror" + (/\bnum\b/.test(to[i].className) ? " num" : "");
+      span.textContent = from[i] ? from[i].value : "";
+      to[i].parentNode.replaceChild(span, to[i]);
+    }
+    clone.querySelectorAll("[id]").forEach(function (el) { el.removeAttribute("id"); });
+    var label = clone.querySelector(".copy-label");
+    if (label) label.textContent = "공급자 보관용";
+    copy2.innerHTML = clone.innerHTML;
+  }
+
+  /* ---- 저장 ---- */
+  function save() {
+    var data = { price: price, mode: elMode.value, receipt: elReceipt.value,
+      date: elDate.value, lines: lineOv };
+    FIELDS.forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) data[id] = el.value;
+    });
+    try { localStorage.setItem(STORE, JSON.stringify(data)); } catch (e) { /* 무시 */ }
+  }
+
+  function load() {
+    var data = {}, q = {};
+    try { data = JSON.parse(localStorage.getItem(STORE) || "{}") || {}; } catch (e) { data = {}; }
+    try { q = JSON.parse(localStorage.getItem(QUOTE_PUBLIC) || "{}") || {}; } catch (e) { q = {}; }
+
+    // 공공기관용 견적서에 이미 적어 둔 정보가 있으면 그것부터 채운다.
+    var fromQuote = { sBizNo: q.pBizNo, sCo: q.pCo, sCeo: q.pCeo, sAddr: q.pAddr,
+      sBiz: q.pBiz, sItem: q.pItem, bCo: q.gOrg, bAddr: q.gAddr };
+
+    FIELDS.forEach(function (id) {
+      var el = document.getElementById(id);
+      if (!el) return;
+      if (typeof data[id] === "string" && data[id] !== "") el.value = data[id];
+      else if (typeof fromQuote[id] === "string") el.value = fromQuote[id];
+    });
+
+    if (q.lines && typeof q.lines === "object") quoteOv = q.lines;
+    if (data.lines && typeof data.lines === "object") lineOv = data.lines;
+
+    if (data.price) {
+      price.blind = parseFloat(data.price.blind) > 0 ? parseFloat(data.price.blind) : 0;
+      price.curtain = parseFloat(data.price.curtain) > 0 ? parseFloat(data.price.curtain) : 0;
+    } else if (q.price) {
+      price.blind = parseFloat(q.price.blind) > 0 ? parseFloat(q.price.blind) : 0;
+      price.curtain = parseFloat(q.price.curtain) > 0 ? parseFloat(q.price.curtain) : 0;
+    }
+    elPriceB.value = String(price.blind);
+    elPriceC.value = String(price.curtain);
+    if (data.mode) elMode.value = data.mode;
+    else if (q.mode) elMode.value = q.mode;
+    if (data.receipt) elReceipt.value = data.receipt;
+
+    elDate.value = data.date || (function () {
+      var t = new Date();
+      return t.getFullYear() + "-" + ("0" + (t.getMonth() + 1)).slice(-2)
+        + "-" + ("0" + t.getDate()).slice(-2);
+    })();
+  }
+
+  /* ---- 조작 ---- */
+  function onPrice() {
+    var b = parseFloat(elPriceB.value), c = parseFloat(elPriceC.value);
+    price.blind = isFinite(b) && b > 0 ? b : 0;
+    price.curtain = isFinite(c) && c > 0 ? c : 0;
+    render();
+    save();
+  }
+  elPriceB.addEventListener("input", onPrice);
+  elPriceC.addEventListener("input", onPrice);
+  [elMode, elReceipt, elDate].forEach(function (el) {
+    el.addEventListener("change", function () { render(); save(); });
+  });
+
+  // 서식 안에서 고친 값은 아래 부에도 곧바로 옮긴다.
+  copy1.addEventListener("input", function (ev) {
+    var el = ev.target;
+    if (el.classList && el.classList.contains("cell-in")) {
+      var tr = el.closest("tr");
+      var key = tr && tr.getAttribute("data-key");
+      if (key) {
+        var k = ovKey(elMode.value, key);
+        var ov = lineOv[k] || (lineOv[k] = {});
+        if (el.classList.contains("num")) {
+          var v = L.priceValue(el.value);
+          ov.price = el.value.trim() === "" ? null : (isFinite(v) && v > 0 ? v : 0);
+          recalcItems();
+        } else if (el.classList.contains("nm")) ov.name = el.value;
+        else ov.spec = el.value;
+      }
+    }
+    syncCopy();
+    save();
+  });
+
+  // 단가 칸에서 손을 떼면 천 단위를 다시 붙인다.
+  copy1.addEventListener("blur", function (ev) {
+    var el = ev.target;
+    if (!el.classList || !el.classList.contains("num")) return;
+    var v = L.priceValue(el.value);
+    el.value = (el.value.trim() === "" || !isFinite(v)) ? "" : v.toLocaleString("ko-KR");
+    syncCopy();
+  }, true);
+
+  document.getElementById("printBtn").addEventListener("click", function () {
+    if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+    window.print();
+  });
+
+  /* ---- 시작 ---- */
+  load();
+  syncCopy();
+
+  L.load(function (err, read) {
+    if (err) {
+      elBody.innerHTML = '<tr><td colspan="8"><p class="error">' + L.attr(err.message)
+        + ' — 이 페이지는 실측대장(index.html)과 같은 주소에서 열어야 합니다.</p></td></tr>';
+      syncCopy();
+      return;
+    }
+    rows = read.rows;
+    elSync.textContent = read.edited
+      ? "대장에서 고친 " + read.edited + "건 반영됨"
+      : "대장 원본 그대로";
+    render();
+  });
+})();
+</script>
+</body>
+</html>
