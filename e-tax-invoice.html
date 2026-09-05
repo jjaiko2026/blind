@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>의령경찰서 창호 세금계산서</title>
+<title>의령경찰서 창호 전자세금계산서</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@700&family=IBM+Plex+Sans+KR:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <style>
-/* 세금계산서 — A4 한 장에 공급받는자 보관용(위) · 공급자 보관용(아래) 두 부. */
+/* 국세청 표준 전자세금계산서 서식 (부가가치세법 시행규칙 별지 제11호서식) 배치. */
 :root{
   color-scheme:light;
   --paper:#f3f5f1;
@@ -32,7 +32,7 @@ body{
 .wrap{max-width:1000px;margin:0 auto;padding:0 20px 80px}
 
 /* --- 조작부 (화면 전용) --- */
-.panel{border:1px solid var(--rule);background:var(--surface);padding:14px 16px;margin:30px 0 22px}
+.panel{border:1px solid var(--rule);background:var(--surface);padding:14px 16px;margin:30px 0 16px}
 .panel h2{margin:0 0 12px;font-size:13px;font-weight:600;letter-spacing:.06em;color:var(--ink2)}
 .panel-row{display:flex;gap:20px;align-items:center;flex-wrap:wrap}
 .panel-row + .panel-row{margin-top:12px;padding-top:12px;border-top:1px dashed var(--rule)}
@@ -55,103 +55,103 @@ body{
 .btn:focus-visible{outline:2px solid var(--pine);outline-offset:1px}
 .acts{display:flex;gap:12px;flex-wrap:wrap;margin-left:auto}
 
-/* --- 계산서 한 부 --- */
-.copy{background:var(--surface);border:2px solid var(--ink);padding:0;margin:0 0 26px}
-.copy-head{display:flex;align-items:center;gap:14px;padding:8px 12px;border-bottom:2px solid var(--ink)}
-.copy-title{
+.caution{
+  border-left:3px solid var(--flag);background:#fbeeeb;color:var(--ink);
+  padding:12px 16px;margin:0 0 24px;font-size:13px;line-height:1.65;
+}
+.caution b{color:var(--flag)}
+
+/* --- 서식 --- */
+.doc{background:var(--surface);border:2px solid var(--ink);margin:0 0 20px}
+.doc-head{display:flex;align-items:center;gap:14px;padding:9px 12px;border-bottom:2px solid var(--ink)}
+.doc-title{
   font-family:"Gowun Batang","Batang",serif;font-weight:700;
-  font-size:23px;letter-spacing:.26em;text-indent:.26em;flex:1 1 auto;text-align:center;
+  font-size:22px;letter-spacing:.22em;text-indent:.22em;
+  flex:1 1 auto;min-width:0;text-align:center;
 }
-.copy-label{
-  font-size:12px;font-weight:600;border:1px solid var(--ink);border-radius:2px;
-  padding:3px 9px;white-space:nowrap;
+.doc-kind{font-size:12px;font-weight:600;border:1px solid var(--ink);border-radius:2px;
+  padding:3px 9px;white-space:nowrap}
+.doc-approval{display:flex;align-items:baseline;gap:8px;white-space:nowrap;flex:0 0 auto}
+.doc-approval span{font-size:11.5px;color:var(--ink2)}
+.doc-approval input{
+  font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.02em;color:var(--ink);
+  background:none;border:0;border-bottom:1px solid var(--rule2);padding:1px 4px 2px;width:210px;
 }
-.copy-serial{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--ink3);white-space:nowrap}
+.doc-approval input:hover{background:var(--band)}
+.doc-approval input:focus{outline:0;border-bottom-color:var(--pine);background:var(--paper)}
 
 table.form{width:100%;border-collapse:collapse;table-layout:fixed}
 table.form th,table.form td{border:1px solid var(--rule2);padding:0;vertical-align:middle}
 .side{
-  width:26px;background:var(--band);text-align:center;font-size:11.5px;font-weight:600;
-  letter-spacing:.02em;line-height:1.25;color:var(--ink2);padding:4px 2px;
+  background:var(--band);text-align:center;font-size:11.5px;font-weight:600;
+  line-height:1.25;color:var(--ink2);padding:4px 2px;
 }
 .lab{
-  background:var(--paper);text-align:center;font-size:11.5px;color:var(--ink2);
-  padding:4px 3px;white-space:nowrap;
+  background:var(--paper);text-align:center;font-size:11px;color:var(--ink2);
+  padding:4px 2px;line-height:1.3;
 }
 .val{padding:0}
 .val input{
-  width:100%;font-family:inherit;font-size:13px;color:var(--ink);
-  background:none;border:0;padding:5px 8px;
+  width:100%;font-family:inherit;font-size:12.5px;color:var(--ink);
+  background:none;border:0;padding:5px 7px;
 }
 .val input:hover{background:var(--band)}
 .val input:focus{outline:0;background:var(--paper);box-shadow:inset 0 -2px 0 var(--pine)}
 .val input::placeholder{color:#a9b7b0}
-.val .mirror{display:block;padding:5px 8px;font-size:13px;min-height:26px}
-.val.mono input,.val.mono .mirror{
-  font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;letter-spacing:.02em;
-}
+.val.mono input{font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums}
 .val.seal{position:relative}
 .val.seal::after{
-  content:"(인)";position:absolute;right:7px;top:50%;transform:translateY(-50%);
-  font-size:10.5px;color:var(--ink3);pointer-events:none;
+  content:"(인)";position:absolute;right:6px;top:50%;transform:translateY(-50%);
+  font-size:10px;color:var(--ink3);pointer-events:none;
 }
-.val.seal input,.val.seal .mirror{padding-right:34px}
+.val.seal input{padding-right:30px}
 
-/* 작성 · 공급가액 · 세액 띠 */
 .strip th{background:var(--band);font-size:11.5px;font-weight:600;color:var(--ink2);padding:4px 3px}
 .strip td{font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;
   text-align:right;padding:5px 9px;font-size:14px;font-weight:600}
-.strip td.note{text-align:left;font-weight:400;font-size:12.5px;padding:0}
+.strip td.plain{text-align:left;font-weight:400;font-size:12.5px;padding:0}
 
-/* 품목 */
 table.items{width:100%;border-collapse:collapse;table-layout:fixed}
 table.items th{
   background:var(--band);font-size:11.5px;font-weight:600;color:var(--ink2);
   border:1px solid var(--rule2);padding:4px 3px;text-align:center;
 }
-table.items td{border:1px solid var(--rule2);padding:0;height:25px}
-table.items .u{font-size:11px;color:var(--ink3);margin-left:3px}
+table.items td{border:1px solid var(--rule2);padding:0;height:24px}
 table.items .c-md{text-align:center;font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--ink3)}
 table.items .c-num{
   font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;
-  text-align:right;padding:3px 8px;font-size:13px;white-space:nowrap;
+  text-align:right;padding:3px 7px;font-size:12.5px;white-space:nowrap;
 }
 table.items .c-supply{font-weight:600}
+table.items .u{font-size:10.5px;color:var(--ink3);margin-left:3px}
 table.items .cell-in{
-  width:100%;display:block;font-family:inherit;font-size:13px;color:inherit;
-  background:none;border:0;padding:3px 8px;line-height:1.4;
+  width:100%;display:block;font-family:inherit;font-size:12.5px;color:inherit;
+  background:none;border:0;padding:3px 7px;line-height:1.4;
 }
 table.items .cell-in.num{
   font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;text-align:right;
 }
 table.items .cell-in:hover{background:var(--band)}
 table.items .cell-in:focus{outline:0;background:var(--paper);box-shadow:inset 0 -2px 0 var(--pine)}
-table.items .mirror{display:block;padding:3px 8px;font-size:13px;min-height:22px}
-table.items .mirror.num{
-  font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;text-align:right;
-}
+table.items .mirror{display:block;padding:3px 7px;font-size:12.5px}
 
-/* 합계 띠 */
 table.tail{width:100%;border-collapse:collapse;table-layout:fixed}
 table.tail th{background:var(--band);font-size:11.5px;font-weight:600;color:var(--ink2);
   border:1px solid var(--rule2);padding:4px 3px;text-align:center}
 table.tail td{border:1px solid var(--rule2);padding:0}
 table.tail .c-num{font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;
   text-align:right;padding:5px 8px;font-size:13.5px;font-weight:600}
-table.tail .receipt{text-align:center;font-size:12px;padding:5px 6px;color:var(--ink2)}
-table.tail .receipt b{color:var(--ink)}
-table.tail input{width:100%;font-family:"IBM Plex Mono",monospace;font-size:13px;
+table.tail input{width:100%;font-family:"IBM Plex Mono",monospace;font-size:12.5px;
   text-align:right;background:none;border:0;padding:5px 8px;color:var(--ink)}
 table.tail input:hover{background:var(--band)}
 table.tail input:focus{outline:0;background:var(--paper);box-shadow:inset 0 -2px 0 var(--pine)}
-table.tail .mirror{display:block;padding:5px 8px;font-size:13px;text-align:right;
-  font-family:"IBM Plex Mono",monospace;min-height:26px}
+table.tail .receipt{text-align:center;font-size:12px;padding:5px 6px;color:var(--ink2)}
+table.tail .receipt b{color:var(--ink)}
 
-.cut{
-  display:flex;align-items:center;gap:10px;margin:0 0 26px;
-  font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--ink3);
+.doc-foot{
+  padding:6px 12px;border-top:1px solid var(--rule2);
+  font-size:10.5px;color:var(--ink3);display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;
 }
-.cut::before,.cut::after{content:"";flex:1 1 auto;border-top:1px dashed var(--rule2)}
 
 footer{margin-top:30px;padding-top:14px;border-top:1px solid var(--rule);
   font-family:"IBM Plex Mono",monospace;font-size:11.5px;color:var(--ink3);
@@ -161,52 +161,58 @@ footer{margin-top:30px;padding-top:14px;border-top:1px solid var(--rule);
 
 @media (prefers-reduced-motion:reduce){*{animation:none !important;transition:none !important}}
 
-/* --- 인쇄: A4 한 장에 두 부 --- */
+/* --- 인쇄 --- */
 @media print{
-  @page{size:A4 portrait;margin:10mm 9mm}
+  @page{size:A4 portrait;margin:14mm 11mm}
   html,body{background:#fff}
-  body{font-size:9pt;line-height:1.25;color:#000}
+  body{font-size:9pt;line-height:1.28;color:#000}
   .wrap{max-width:none;padding:0}
-  .panel,.acts,footer,.hint{display:none !important}
+  .panel,.acts,footer,.hint,.caution{display:none !important}
 
-  .copy{margin:0;border-width:1.2pt;break-inside:avoid;page-break-inside:avoid}
-  .copy-head{padding:5px 9px;border-bottom:1.2pt solid #000}
-  .copy-title{font-size:17pt}
-  .copy-label{font-size:8.5pt;padding:2px 7px;border:.6pt solid #000}
-  .copy-serial{font-size:7.5pt;color:#333}
+  .doc{margin:0;border-width:1.2pt}
+  .doc-head{padding:6px 9px;border-bottom:1.2pt solid #000}
+  .doc-title{font-size:18pt}
+  .doc-kind{font-size:8.5pt;padding:2px 7px;border:.6pt solid #000}
+  .doc-approval span{font-size:8pt;color:#000}
+  .doc-approval input{font-size:8.5pt;width:208px;border-bottom-color:#999;color:#000}
 
   table.form th,table.form td,table.items th,table.items td,
   table.tail th,table.tail td{border:.4pt solid #666}
-  .side{width:20px;font-size:8.5pt;padding:3px 1px;color:#000;background:#ececec;
-    -webkit-print-color-adjust:exact;print-color-adjust:exact}
-  .lab,.strip th,table.items th,table.tail th{font-size:8pt;padding:2.5px 2px;color:#000;
-    background:#ececec;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-  .val input,.val .mirror{font-size:9pt;padding:3px 6px;color:#000;min-height:0}
-  .val.seal::after{font-size:7.5pt;right:5px}
-  .val.seal input,.val.seal .mirror{padding-right:26px}
+  .side,.lab,.strip th,table.items th,table.tail th{
+    font-size:8pt;padding:2.5px 2px;color:#000;background:#ececec;
+    -webkit-print-color-adjust:exact;print-color-adjust:exact;
+  }
+  .val input{font-size:8.5pt;padding:3px 5px;color:#000}
+  .val.seal::after{font-size:7.5pt;right:4px}
+  .val.seal input{padding-right:24px}
   .strip td{font-size:10pt;padding:3px 7px}
-  .strip td.note{font-size:8.5pt}
+  .strip td.plain{font-size:8.5pt}
 
   table.items td{height:auto}
-  table.items .cell-in,table.items .mirror{font-size:8.5pt;padding:2px 6px;min-height:0}
-  table.items .c-num{font-size:8.5pt;padding:2px 6px}
-  table.items .u{font-size:7.5pt;color:#333}
+  table.items .cell-in,table.items .mirror{font-size:8.5pt;padding:2px 5px}
+  table.items .c-num{font-size:8.5pt;padding:2px 5px}
   table.items .c-md{font-size:8pt}
-  table.tail .c-num,table.tail input,table.tail .mirror{font-size:9pt;padding:3px 6px;min-height:0}
+  table.items .u{font-size:7.5pt;color:#333}
+  table.tail .c-num,table.tail input{font-size:9pt;padding:3px 6px}
   table.tail .receipt{font-size:8.5pt;padding:3px 4px;color:#000}
+  .doc-foot{font-size:7.5pt;color:#333;padding:4px 9px;border-top:.4pt solid #666}
 
-  input::placeholder{color:transparent}   /* 빈 칸은 줄만 남긴다 */
+  input::placeholder{color:transparent}
   input:hover,input:focus{background:none !important;box-shadow:none !important}
-
-  /* 두 부 사이는 자르는 선 하나로 */
-  .cut{margin:5mm 0;font-size:7pt;color:#555}
-  .cut::before,.cut::after{border-top:.4pt dashed #999}
 }
 </style>
 </head>
 <body>
 
 <div class="wrap">
+
+<p class="caution">
+  <b>발급은 홈택스에서 하셔야 합니다.</b>
+  이 페이지는 국세청 표준 전자세금계산서 서식(「부가가치세법 시행규칙」 별지 제11호서식)에 맞춰
+  <b>내용을 채워 출력·보관</b>하기 위한 것입니다. 실제 전자세금계산서 발급과 국세청 전송은 홈택스 또는
+  발급대행 사업자를 통해야 하며, <b>승인번호는 발급이 끝난 뒤 국세청이 부여</b>합니다.
+  발급 후 받은 승인번호를 아래 칸에 옮겨 적으세요.
+</p>
 
 <section class="panel">
   <h2>작성 설정 <span class="hint">— 이 칸은 인쇄되지 않습니다</span></h2>
@@ -223,109 +229,129 @@ footer{margin-top:30px;padding-top:14px;border-top:1px solid var(--rule);
     </label>
   </div>
   <div class="panel-row">
+    <label>종류
+      <select id="kindSel">
+        <option value="공급받는자 보관용">공급받는자 보관용</option>
+        <option value="공급자 보관용">공급자 보관용</option>
+      </select>
+    </label>
     <label>영수 / 청구
       <select id="receiptSel">
         <option value="청구">청구</option>
         <option value="영수">영수</option>
       </select>
     </label>
-    <span class="hint">품목 줄이 6줄을 넘으면 마지막 줄에 "외 N건"으로 묶습니다</span>
+    <span class="hint">품목이 12줄을 넘으면 마지막 줄에 "외 N건"으로 묶습니다</span>
     <span class="acts">
       <a class="btn" href="./index.html">실측대장</a>
-      <a class="btn" href="./quote.html">자사 견적서</a>
       <a class="btn" href="./quote-public.html">공공기관용 견적서</a>
-      <a class="btn" href="./e-tax-invoice.html">전자세금계산서</a>
+      <a class="btn" href="./tax-invoice.html">종이 세금계산서</a>
       <button type="button" class="btn" id="printBtn">인쇄 · PDF로 저장</button>
     </span>
   </div>
 </section>
 
-<div id="copy1" class="copy">
-  <div class="copy-head">
-    <span class="copy-label">공급받는자 보관용</span>
-    <span class="copy-title">세금계산서</span>
-    <span class="copy-serial">책번호 &nbsp;&nbsp; 권 &nbsp;&nbsp; 호 &nbsp;·&nbsp; 일련번호</span>
+<div id="doc" class="doc">
+  <div class="doc-head">
+    <span class="doc-kind" id="outKind">공급받는자 보관용</span>
+    <span class="doc-title">전자세금계산서</span>
+    <span class="doc-approval"><span>승인번호</span><input id="approvalNo" placeholder="20260905-00000000-00000000"></span>
   </div>
 
   <table class="form">
     <colgroup>
-      <col style="width:26px"><col style="width:66px"><col style="width:24%">
-      <col style="width:26px"><col style="width:66px"><col>
+      <col style="width:24px"><col style="width:56px"><col style="width:18%">
+      <col style="width:50px"><col style="width:12%">
+      <col style="width:24px"><col style="width:56px"><col style="width:18%">
+      <col style="width:50px"><col>
     </colgroup>
     <tbody>
       <tr>
-        <td class="side" rowspan="4">공<br>급<br>자</td>
+        <td class="side" rowspan="6">공<br>급<br>자</td>
         <td class="lab">등록번호</td>
         <td class="val mono"><input id="sBizNo" placeholder="000-00-00000"></td>
-        <td class="side" rowspan="4">공<br>급<br>받<br>는<br>자</td>
+        <td class="lab">종사업장<br>번호</td>
+        <td class="val mono"><input id="sSubNo" placeholder=""></td>
+        <td class="side" rowspan="6">공<br>급<br>받<br>는<br>자</td>
         <td class="lab">등록번호</td>
         <td class="val mono"><input id="bBizNo" placeholder="000-00-00000"></td>
+        <td class="lab">종사업장<br>번호</td>
+        <td class="val mono"><input id="bSubNo" placeholder=""></td>
       </tr>
       <tr>
-        <td class="lab">상호</td>
-        <td class="val"><input id="sCo" placeholder="상호 (법인명)"></td>
-        <td class="lab">상호</td>
-        <td class="val"><input id="bCo" placeholder="상호 (기관명)"></td>
-      </tr>
-      <tr>
+        <td class="lab">상호<br>(법인명)</td>
+        <td class="val"><input id="sCo" placeholder="상호"></td>
         <td class="lab">성명</td>
         <td class="val seal"><input id="sCeo" placeholder="대표자"></td>
+        <td class="lab">상호<br>(법인명)</td>
+        <td class="val"><input id="bCo" placeholder="상호"></td>
         <td class="lab">성명</td>
         <td class="val seal"><input id="bCeo" placeholder="대표자"></td>
       </tr>
       <tr>
-        <td class="lab">사업장</td>
-        <td class="val"><input id="sAddr" placeholder="사업장 주소"></td>
-        <td class="lab">사업장</td>
-        <td class="val"><input id="bAddr" placeholder="사업장 주소"></td>
+        <td class="lab">사업장<br>주소</td>
+        <td class="val" colspan="3"><input id="sAddr" placeholder="사업장 주소"></td>
+        <td class="lab">사업장<br>주소</td>
+        <td class="val" colspan="3"><input id="bAddr" placeholder="사업장 주소"></td>
       </tr>
       <tr>
-        <td class="side">업<br>종</td>
         <td class="lab">업태</td>
         <td class="val"><input id="sBiz" placeholder="업태"></td>
-        <td class="side">업<br>종</td>
-        <td class="lab">업태</td>
-        <td class="val"><input id="bBiz" placeholder="업태"></td>
-      </tr>
-      <tr>
-        <td class="side"></td>
         <td class="lab">종목</td>
         <td class="val"><input id="sItem" placeholder="종목"></td>
-        <td class="side"></td>
+        <td class="lab">업태</td>
+        <td class="val"><input id="bBiz" placeholder="업태"></td>
         <td class="lab">종목</td>
         <td class="val"><input id="bItem" placeholder="종목"></td>
+      </tr>
+      <tr>
+        <td class="lab">이메일</td>
+        <td class="val" colspan="3"><input id="sMail" placeholder="이메일"></td>
+        <td class="lab">이메일</td>
+        <td class="val" colspan="3"><input id="bMail1" placeholder="이메일"></td>
+      </tr>
+      <tr>
+        <td class="lab"></td>
+        <td class="val" colspan="3"><input id="sMail2" placeholder=""></td>
+        <td class="lab">이메일</td>
+        <td class="val" colspan="3"><input id="bMail2" placeholder="이메일 (2)"></td>
       </tr>
     </tbody>
   </table>
 
   <table class="form strip">
-    <colgroup><col style="width:22%"><col style="width:26%"><col style="width:22%"><col></colgroup>
-    <thead><tr><th>작 성</th><th>공 급 가 액</th><th>세 액</th><th>비 고</th></tr></thead>
+    <colgroup><col style="width:18%"><col style="width:24%"><col style="width:20%"><col></colgroup>
+    <thead><tr><th>작성일자</th><th>공 급 가 액</th><th>세 액</th><th>수정사유</th></tr></thead>
     <tbody><tr>
       <td id="outDate">—</td>
       <td id="outSupply">—</td>
       <td id="outTax">—</td>
-      <td class="note val"><input id="tNote" placeholder="비고"></td>
+      <td class="plain val"><input id="amendReason" placeholder="해당 없음"></td>
     </tr></tbody>
+  </table>
+
+  <table class="form strip">
+    <colgroup><col style="width:18%"><col></colgroup>
+    <thead><tr><th>비 고</th><th class="plain val" style="padding:0"><input id="tNote" placeholder="비고"></th></tr></thead>
   </table>
 
   <table class="items">
     <colgroup>
-      <col style="width:5%"><col style="width:5%"><col style="width:22%"><col style="width:17%">
-      <col style="width:8%"><col style="width:13%"><col style="width:15%"><col style="width:15%">
+      <col style="width:4.5%"><col style="width:4.5%"><col style="width:21%"><col style="width:16%">
+      <col style="width:9%"><col style="width:12%"><col style="width:14%"><col style="width:11%"><col style="width:8%">
     </colgroup>
     <thead><tr>
       <th>월</th><th>일</th><th>품 목</th><th>규 격</th>
-      <th>수량</th><th>단 가</th><th>공급가액</th><th>세 액</th>
+      <th>수량</th><th>단 가</th><th>공급가액</th><th>세 액</th><th>비고</th>
     </tr></thead>
     <tbody id="itemBody">
-      <tr><td colspan="8" style="padding:14px;text-align:center;color:#8a9a92">실측대장을 읽는 중…</td></tr>
+      <tr><td colspan="9" style="padding:14px;text-align:center;color:#8a9a92">실측대장을 읽는 중…</td></tr>
     </tbody>
   </table>
 
   <table class="tail">
     <colgroup>
-      <col style="width:22%"><col style="width:15%"><col style="width:15%">
+      <col style="width:20%"><col style="width:15%"><col style="width:15%">
       <col style="width:15%"><col style="width:15%"><col>
     </colgroup>
     <thead><tr>
@@ -334,18 +360,19 @@ footer{margin-top:30px;padding-top:14px;border-top:1px solid var(--rule);
     </tr></thead>
     <tbody><tr>
       <td class="c-num" id="outTotal">—</td>
-      <td><input id="pCash" placeholder=""></td>
-      <td><input id="pCheck" placeholder=""></td>
-      <td><input id="pNote" placeholder=""></td>
-      <td><input id="pCredit" placeholder=""></td>
-      <td class="receipt"><b id="outReceipt">청구</b>함</td>
+      <td><input id="pCash"></td>
+      <td><input id="pCheck"></td>
+      <td><input id="pNote"></td>
+      <td><input id="pCredit"></td>
+      <td class="receipt"><b id="outReceipt">청구</b> 함</td>
     </tr></tbody>
   </table>
+
+  <div class="doc-foot">
+    <span>「부가가치세법 시행규칙」 [별지 제11호서식] 전자세금계산서</span>
+    <span>210㎜ × 297㎜ (백상지 80g/㎡)</span>
+  </div>
 </div>
-
-<p class="cut">여기를 자르세요</p>
-
-<div id="copy2" class="copy"></div>
 
 <footer>
   <span>실측대장에서 자동 집계 · 수량을 고치려면 대장에서 수정하세요</span>
@@ -359,41 +386,42 @@ footer{margin-top:30px;padding-top:14px;border-top:1px solid var(--rule);
 (function () {
   "use strict";
 
-  /* 금액은 견적서와 같은 엔진에서 뽑는다 — 계산서가 견적과 어긋나면 안 된다. */
+  /* 금액은 견적서 · 세금계산서와 같은 엔진에서 뽑는다. */
   var L = window.Ledger;
-  var STORE = "uiryeong-tax-v1";
+  var STORE = "uiryeong-etax-v1";
+  var TAX = "uiryeong-tax-v1";
   var QUOTE_PUBLIC = "uiryeong-quote-public-v1";
-  var MAX_ROWS = 6;   // 서식이 A4 절반에 들어가야 하므로 넘치는 품목은 묶는다
-  var MIN_ROWS = 4;   // 줄이 적어도 서식 모양은 지킨다
+  var MAX_ROWS = 12;
+  var MIN_ROWS = 4;
 
   var rows = [];
   var base = L.readBase();
   var price = { blind: 0, curtain: 0 };
-  var lineOv = {};    // 계산서에서 직접 고친 값
-  var quoteOv = {};   // 공공기관용 견적서에서 고친 값 — 계산서의 기본값이 된다
+  var lineOv = {};
+  var inheritOv = {};
 
-  var copy1 = document.getElementById("copy1");
-  var copy2 = document.getElementById("copy2");
+  var doc = document.getElementById("doc");
   var elBody = document.getElementById("itemBody");
   var elSync = document.getElementById("syncNote");
   var elMode = document.getElementById("modeSel");
+  var elKind = document.getElementById("kindSel");
   var elReceipt = document.getElementById("receiptSel");
   var elPriceB = document.getElementById("priceBlind");
   var elPriceC = document.getElementById("priceCurtain");
   var elDate = document.getElementById("tDate");
 
-  var FIELDS = ["sBizNo", "sCo", "sCeo", "sAddr", "sBiz", "sItem",
-    "bBizNo", "bCo", "bCeo", "bAddr", "bBiz", "bItem",
-    "tNote", "pCash", "pCheck", "pNote", "pCredit"];
+  var FIELDS = ["approvalNo",
+    "sBizNo", "sSubNo", "sCo", "sCeo", "sAddr", "sBiz", "sItem", "sMail", "sMail2",
+    "bBizNo", "bSubNo", "bCo", "bCeo", "bAddr", "bBiz", "bItem", "bMail1", "bMail2",
+    "amendReason", "tNote", "pCash", "pCheck", "pNote", "pCredit"];
 
   function ovKey(mode, key) { return mode + "|" + key; }
 
-  // 계산서에서 고친 값이 먼저, 없으면 견적서 값, 그것도 없으면 대장에서 온 값.
   function pick(e, mode, field, fallback) {
     var mine = lineOv[ovKey(mode, e.key)] || {};
-    var quoted = quoteOv[ovKey(mode, e.key)] || {};
+    var up = inheritOv[ovKey(mode, e.key)] || {};
     if (Object.prototype.hasOwnProperty.call(mine, field)) return mine[field];
-    if (Object.prototype.hasOwnProperty.call(quoted, field)) return quoted[field];
+    if (Object.prototype.hasOwnProperty.call(up, field)) return up[field];
     return fallback;
   }
 
@@ -410,7 +438,6 @@ footer{margin-top:30px;padding-top:14px;border-top:1px solid var(--rule);
     var d = elDate.value ? elDate.value.split("-") : ["", "", ""];
     var mm = d[1] || "", dd = d[2] || "";
 
-    // 서식 높이가 정해져 있으므로 넘치는 줄은 마지막 한 줄로 묶는다.
     var shown = items, rest = null;
     if (items.length > MAX_ROWS) {
       shown = items.slice(0, MAX_ROWS - 1);
@@ -429,10 +456,12 @@ footer{margin-top:30px;padding-top:14px;border-top:1px solid var(--rule);
         + '<td><input class="cell-in nm" value="' + L.attr(name) + '" aria-label="품목"></td>'
         + '<td><input class="cell-in sp" value="' + L.attr(spec) + '" aria-label="규격"></td>'
         + '<td class="c-num">' + L.num(e.bill, e.unit === "개" ? 0 : 2)
-        + ' <span class="u">' + e.unit + '</span></td>'
+        + '<span class="u">' + e.unit + '</span></td>'
         + '<td><input class="cell-in num" value="'
         + L.attr(unit === "" ? "" : Number(unit).toLocaleString("ko-KR")) + '" aria-label="단가"></td>'
-        + '<td class="c-num c-supply">—</td><td class="c-num c-tax">—</td></tr>';
+        + '<td class="c-num c-supply">—</td><td class="c-num c-tax">—</td>'
+        + '<td><input class="cell-in rm" value="' + L.attr(pick(e, mode, "rem", "")) + '" aria-label="비고"></td>'
+        + '</tr>';
     });
 
     if (rest) {
@@ -446,21 +475,20 @@ footer{margin-top:30px;padding-top:14px;border-top:1px solid var(--rule);
         + '<td class="c-md">' + L.attr(mm) + '</td><td class="c-md">' + L.attr(dd) + '</td>'
         + '<td><span class="mirror">외 ' + rest.length + '건</span></td>'
         + '<td><span class="mirror">별첨 명세 참조</span></td>'
-        + '<td class="c-num">—</td><td><span class="mirror num">—</span></td>'
-        + '<td class="c-num c-supply">—</td><td class="c-num c-tax">—</td></tr>';
+        + '<td class="c-num">—</td><td><span class="mirror">—</span></td>'
+        + '<td class="c-num c-supply">—</td><td class="c-num c-tax">—</td><td></td></tr>';
     }
 
     var used = shown.length + (rest ? 1 : 0);
     for (var i = used; i < MIN_ROWS; i++) {
       html += '<tr><td class="c-md"></td><td class="c-md"></td><td></td><td></td>'
-        + '<td class="c-num"></td><td></td><td class="c-num"></td><td class="c-num"></td></tr>';
+        + '<td class="c-num"></td><td></td><td class="c-num"></td><td class="c-num"></td><td></td></tr>';
     }
 
     elBody.innerHTML = html;
     recalcItems();
   }
 
-  /* ---- 금액만 다시 셈한다 — 표를 다시 그리면 적고 있던 칸에서 손이 떠난다 ---- */
   function recalcItems() {
     var supplyAll = 0, taxAll = 0;
 
@@ -487,31 +515,13 @@ footer{margin-top:30px;padding-top:14px;border-top:1px solid var(--rule);
     document.getElementById("outDate").textContent = elDate.value
       ? elDate.value.replace(/-/g, ". ") + "." : "—";
     document.getElementById("outReceipt").textContent = elReceipt.value;
-
-    syncCopy();
-  }
-
-  /* ---- 아래 부는 위 부를 그대로 옮겨 찍는다 ---- */
-  function syncCopy() {
-    var clone = copy1.cloneNode(true);
-    var from = copy1.querySelectorAll("input");
-    var to = clone.querySelectorAll("input");
-    for (var i = 0; i < to.length; i++) {
-      var span = document.createElement("span");
-      span.className = "mirror" + (/\bnum\b/.test(to[i].className) ? " num" : "");
-      span.textContent = from[i] ? from[i].value : "";
-      to[i].parentNode.replaceChild(span, to[i]);
-    }
-    clone.querySelectorAll("[id]").forEach(function (el) { el.removeAttribute("id"); });
-    var label = clone.querySelector(".copy-label");
-    if (label) label.textContent = "공급자 보관용";
-    copy2.innerHTML = clone.innerHTML;
+    document.getElementById("outKind").textContent = elKind.value;
   }
 
   /* ---- 저장 ---- */
   function save() {
-    var data = { price: price, mode: elMode.value, receipt: elReceipt.value,
-      date: elDate.value, lines: lineOv };
+    var data = { price: price, mode: elMode.value, kind: elKind.value,
+      receipt: elReceipt.value, date: elDate.value, lines: lineOv };
     FIELDS.forEach(function (id) {
       var el = document.getElementById(id);
       if (el) data[id] = el.value;
@@ -520,41 +530,54 @@ footer{margin-top:30px;padding-top:14px;border-top:1px solid var(--rule);
   }
 
   function load() {
-    var data = {}, q = {};
+    var data = {}, t = {}, q = {};
     try { data = JSON.parse(localStorage.getItem(STORE) || "{}") || {}; } catch (e) { data = {}; }
+    try { t = JSON.parse(localStorage.getItem(TAX) || "{}") || {}; } catch (e) { t = {}; }
     try { q = JSON.parse(localStorage.getItem(QUOTE_PUBLIC) || "{}") || {}; } catch (e) { q = {}; }
 
-    // 공공기관용 견적서에 이미 적어 둔 정보가 있으면 그것부터 채운다.
-    var fromQuote = { sBizNo: q.pBizNo, sCo: q.pCo, sCeo: q.pCeo, sAddr: q.pAddr,
-      sBiz: q.pBiz, sItem: q.pItem, bCo: q.gOrg, bAddr: q.gAddr };
+    // 이미 적어 둔 것이 있으면 종이 세금계산서 → 공공기관용 견적서 차례로 물려받는다.
+    var inherited = {};
+    ["sBizNo", "sCo", "sCeo", "sAddr", "sBiz", "sItem",
+      "bBizNo", "bCo", "bCeo", "bAddr", "bBiz", "bItem",
+      "tNote", "pCash", "pCheck", "pNote", "pCredit"].forEach(function (id) {
+      if (typeof t[id] === "string" && t[id] !== "") inherited[id] = t[id];
+    });
+    if (inherited.sBizNo === undefined && typeof q.pBizNo === "string") inherited.sBizNo = q.pBizNo;
+    if (inherited.sCo === undefined && typeof q.pCo === "string") inherited.sCo = q.pCo;
+    if (inherited.sCeo === undefined && typeof q.pCeo === "string") inherited.sCeo = q.pCeo;
+    if (inherited.sAddr === undefined && typeof q.pAddr === "string") inherited.sAddr = q.pAddr;
+    if (inherited.sBiz === undefined && typeof q.pBiz === "string") inherited.sBiz = q.pBiz;
+    if (inherited.sItem === undefined && typeof q.pItem === "string") inherited.sItem = q.pItem;
+    if (inherited.bCo === undefined && typeof q.gOrg === "string") inherited.bCo = q.gOrg;
+    if (inherited.bAddr === undefined && typeof q.gAddr === "string") inherited.bAddr = q.gAddr;
 
     FIELDS.forEach(function (id) {
       var el = document.getElementById(id);
       if (!el) return;
       if (typeof data[id] === "string" && data[id] !== "") el.value = data[id];
-      else if (typeof fromQuote[id] === "string") el.value = fromQuote[id];
+      else if (typeof inherited[id] === "string") el.value = inherited[id];
     });
 
-    if (q.lines && typeof q.lines === "object") quoteOv = q.lines;
+    if (t.lines && typeof t.lines === "object") inheritOv = t.lines;
+    else if (q.lines && typeof q.lines === "object") inheritOv = q.lines;
     if (data.lines && typeof data.lines === "object") lineOv = data.lines;
 
-    if (data.price) {
-      price.blind = parseFloat(data.price.blind) > 0 ? parseFloat(data.price.blind) : 0;
-      price.curtain = parseFloat(data.price.curtain) > 0 ? parseFloat(data.price.curtain) : 0;
-    } else if (q.price) {
-      price.blind = parseFloat(q.price.blind) > 0 ? parseFloat(q.price.blind) : 0;
-      price.curtain = parseFloat(q.price.curtain) > 0 ? parseFloat(q.price.curtain) : 0;
+    var src = data.price || t.price || q.price;
+    if (src) {
+      price.blind = parseFloat(src.blind) > 0 ? parseFloat(src.blind) : 0;
+      price.curtain = parseFloat(src.curtain) > 0 ? parseFloat(src.curtain) : 0;
     }
     elPriceB.value = String(price.blind);
     elPriceC.value = String(price.curtain);
-    if (data.mode) elMode.value = data.mode;
-    else if (q.mode) elMode.value = q.mode;
+    elMode.value = data.mode || t.mode || q.mode || "prod";
+    if (data.kind) elKind.value = data.kind;
     if (data.receipt) elReceipt.value = data.receipt;
+    else if (t.receipt) elReceipt.value = t.receipt;
 
-    elDate.value = data.date || (function () {
-      var t = new Date();
-      return t.getFullYear() + "-" + ("0" + (t.getMonth() + 1)).slice(-2)
-        + "-" + ("0" + t.getDate()).slice(-2);
+    elDate.value = data.date || t.date || (function () {
+      var n = new Date();
+      return n.getFullYear() + "-" + ("0" + (n.getMonth() + 1)).slice(-2)
+        + "-" + ("0" + n.getDate()).slice(-2);
     })();
   }
 
@@ -568,12 +591,11 @@ footer{margin-top:30px;padding-top:14px;border-top:1px solid var(--rule);
   }
   elPriceB.addEventListener("input", onPrice);
   elPriceC.addEventListener("input", onPrice);
-  [elMode, elReceipt, elDate].forEach(function (el) {
+  [elMode, elKind, elReceipt, elDate].forEach(function (el) {
     el.addEventListener("change", function () { render(); save(); });
   });
 
-  // 서식 안에서 고친 값은 아래 부에도 곧바로 옮긴다.
-  copy1.addEventListener("input", function (ev) {
+  doc.addEventListener("input", function (ev) {
     var el = ev.target;
     if (el.classList && el.classList.contains("cell-in")) {
       var tr = el.closest("tr");
@@ -586,20 +608,18 @@ footer{margin-top:30px;padding-top:14px;border-top:1px solid var(--rule);
           ov.price = el.value.trim() === "" ? null : (isFinite(v) && v > 0 ? v : 0);
           recalcItems();
         } else if (el.classList.contains("nm")) ov.name = el.value;
-        else ov.spec = el.value;
+        else if (el.classList.contains("sp")) ov.spec = el.value;
+        else ov.rem = el.value;
       }
     }
-    syncCopy();
     save();
   });
 
-  // 단가 칸에서 손을 떼면 천 단위를 다시 붙인다.
-  copy1.addEventListener("blur", function (ev) {
+  doc.addEventListener("blur", function (ev) {
     var el = ev.target;
     if (!el.classList || !el.classList.contains("num")) return;
     var v = L.priceValue(el.value);
     el.value = (el.value.trim() === "" || !isFinite(v)) ? "" : v.toLocaleString("ko-KR");
-    syncCopy();
   }, true);
 
   document.getElementById("printBtn").addEventListener("click", function () {
@@ -609,13 +629,11 @@ footer{margin-top:30px;padding-top:14px;border-top:1px solid var(--rule);
 
   /* ---- 시작 ---- */
   load();
-  syncCopy();
 
   L.load(function (err, read) {
     if (err) {
-      elBody.innerHTML = '<tr><td colspan="8"><p class="error">' + L.attr(err.message)
+      elBody.innerHTML = '<tr><td colspan="9"><p class="error">' + L.attr(err.message)
         + ' — 이 페이지는 실측대장(index.html)과 같은 주소에서 열어야 합니다.</p></td></tr>';
-      syncCopy();
       return;
     }
     rows = read.rows;
