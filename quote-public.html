@@ -1,0 +1,667 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>의령경찰서 창호 견적서 (공공기관 제출용)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@700&family=IBM+Plex+Sans+KR:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* 제출용 문서 — 실측대장과 같은 서체를 쓰되, 관공서 서식답게 선을 굵게 두른다. */
+:root{
+  color-scheme:light;
+  --paper:#f3f5f1;
+  --surface:#ffffff;
+  --band:#e7ebe4;
+  --ink:#0e171d;
+  --ink2:#37474f;
+  --ink3:#566870;
+  --rule:#d3dbd2;
+  --rule2:#aebab1;
+  --pine:#14563f;
+  --flag:#8d2c1c;
+}
+
+*{box-sizing:border-box}
+body{
+  background:var(--paper);
+  color:var(--ink);
+  font-family:"IBM Plex Sans KR","Malgun Gothic","맑은 고딕",system-ui,sans-serif;
+  font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1000px;margin:0 auto;padding:0 20px 80px}
+
+/* --- 표제 --- */
+.mast{padding:44px 0 0;text-align:center}
+h1{
+  font-family:"Gowun Batang","Batang",serif;
+  font-weight:700;font-size:clamp(30px,6vw,46px);
+  line-height:1.15;margin:0 0 6px;letter-spacing:.3em;text-indent:.3em;
+}
+.mast-rule{height:3px;background:var(--ink);margin:10px 0 0}
+.mast-meta{
+  display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;
+  font-family:"IBM Plex Mono",monospace;font-size:12.5px;color:var(--ink2);
+  margin:10px 0 0;
+}
+.mast-meta label{display:flex;align-items:baseline;gap:8px}
+.mast-meta input{
+  font-family:"IBM Plex Mono",monospace;font-size:12.5px;color:var(--ink);
+  background:none;border:0;border-bottom:1px solid var(--rule);
+  padding:1px 4px 2px;min-width:150px;
+}
+.mast-meta input:hover{background:var(--band)}
+.mast-meta input:focus{outline:0;border-bottom-color:var(--pine);background:var(--paper)}
+.mast-meta input::placeholder{color:#a9b7b0}
+
+/* --- 당사자 --- */
+.parties{
+  display:grid;grid-template-columns:1fr 1fr;gap:0;
+  border:2px solid var(--ink);margin:16px 0 0;background:var(--surface);
+}
+.party + .party{border-left:1px solid var(--ink)}
+.party h2{
+  margin:0;padding:7px 12px;text-align:center;
+  font-size:12.5px;font-weight:600;letter-spacing:.3em;text-indent:.3em;
+  background:var(--band);border-bottom:1px solid var(--ink);
+}
+.prow{display:flex;align-items:stretch;border-bottom:1px solid var(--rule)}
+.prow:last-child{border-bottom:0}
+.prow > span{
+  flex:0 0 84px;display:flex;align-items:center;justify-content:center;
+  font-size:12px;color:var(--ink2);background:var(--paper);
+  border-right:1px solid var(--rule);padding:5px 4px;text-align:center;
+}
+.prow input{
+  flex:1 1 auto;min-width:0;font-family:inherit;font-size:14px;color:var(--ink);
+  background:none;border:0;padding:6px 10px;
+}
+.prow input:hover{background:var(--band)}
+.prow input:focus{outline:0;background:var(--paper);box-shadow:inset 0 -2px 0 var(--pine)}
+.prow input::placeholder{color:#a9b7b0}
+.prow.split{gap:0}
+.prow.split .half{flex:1 1 50%;display:flex;align-items:stretch;min-width:0}
+.prow.split .half + .half{border-left:1px solid var(--rule)}
+.prow .strong{font-weight:600;font-size:15px}
+.seal{
+  flex:0 0 46px;display:flex;align-items:center;justify-content:center;
+  font-size:11px;color:var(--ink3);border-left:1px dashed var(--rule2);
+}
+
+/* --- 합계 --- */
+.grand{
+  margin:14px 0 0;border:2px solid var(--ink);background:var(--surface);
+  display:flex;align-items:stretch;
+}
+.grand h2{
+  margin:0;flex:0 0 110px;display:flex;align-items:center;justify-content:center;
+  font-size:12.5px;font-weight:600;letter-spacing:.2em;text-indent:.2em;
+  background:var(--band);border-right:1px solid var(--ink);
+}
+.grand-body{flex:1 1 auto;padding:12px 18px;display:flex;align-items:baseline;gap:16px;flex-wrap:wrap}
+.grand-han{
+  font-family:"Gowun Batang","Batang",serif;font-size:clamp(19px,3.2vw,25px);
+  font-weight:700;flex:1 1 auto;
+}
+.grand-num{
+  font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;
+  font-size:19px;font-weight:600;white-space:nowrap;
+}
+.grand-note{width:100%;margin:4px 0 0;font-family:"IBM Plex Mono",monospace;
+  font-size:11.5px;color:var(--ink3)}
+
+/* --- 조작부 (화면 전용) --- */
+.panel{border:1px solid var(--rule);background:var(--surface);padding:14px 16px;margin:18px 0 0}
+.panel h2{margin:0 0 12px;font-size:13px;font-weight:600;letter-spacing:.06em;color:var(--ink2)}
+.panel-row{display:flex;gap:20px;align-items:center;flex-wrap:wrap}
+.panel-row + .panel-row{margin-top:12px;padding-top:12px;border-top:1px dashed var(--rule)}
+.panel label{display:flex;align-items:center;gap:7px;font-size:13px;color:var(--ink2)}
+.panel input[type=number]{
+  font-family:"IBM Plex Mono",monospace;font-size:14px;font-variant-numeric:tabular-nums;
+  width:104px;padding:4px 8px;border:1px solid var(--rule2);border-radius:2px;
+  background:var(--paper);color:var(--ink);text-align:right;
+}
+.panel select{font-family:inherit;font-size:13px;padding:4px 8px;
+  border:1px solid var(--rule2);border-radius:2px;background:var(--paper);color:var(--ink)}
+.panel input:focus-visible,.panel select:focus-visible{outline:2px solid var(--pine);outline-offset:1px}
+.hint{font-size:12px;color:var(--ink3)}
+.btn{font-family:inherit;font-size:12.5px;color:var(--ink2);background:none;
+  border:1px solid var(--rule2);padding:4px 12px;border-radius:2px;cursor:pointer;
+  text-decoration:none;display:inline-block}
+.btn:hover{border-color:var(--flag);color:var(--flag)}
+.btn:focus-visible{outline:2px solid var(--pine);outline-offset:1px}
+.acts{display:flex;gap:12px;flex-wrap:wrap;margin-left:auto}
+
+/* --- 명세 --- */
+.spec{margin:14px 0 0}
+.scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:14px;table-layout:fixed;min-width:860px}
+th{
+  font-size:12px;font-weight:600;letter-spacing:.06em;color:var(--ink);text-align:center;
+  padding:7px 6px;background:var(--band);
+  border:1px solid var(--ink);white-space:nowrap;
+}
+td{padding:5px 8px;border:1px solid var(--rule2);vertical-align:middle;background:var(--surface)}
+.c-no{text-align:center;font-family:"IBM Plex Mono",monospace;font-size:12.5px;color:var(--ink3)}
+.c-unit{text-align:center;font-size:12.5px;color:var(--ink2)}
+.c-qty,.c-price,.c-supply,.c-tax{
+  font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;
+  text-align:right;white-space:nowrap;
+}
+.c-supply{font-weight:600}
+/* 칸마다 글줄이 어긋나지 않도록 입력칸을 블록으로 깔고 칸에서 가운데 맞춘다. */
+.cell-in{
+  display:block;width:100%;font-family:inherit;font-size:inherit;color:inherit;
+  background:none;border:0;padding:1px 2px;border-radius:0;line-height:1.4;
+}
+.cell-in:hover{background:var(--band)}
+.cell-in:focus{outline:0;background:var(--paper);box-shadow:inset 0 -2px 0 var(--pine)}
+.cell-in.name{font-weight:500}
+.cell-in.price{font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;text-align:right}
+.cell-in.rem{font-size:12.5px;color:var(--ink2)}
+.cell-in.price::-webkit-outer-spin-button,
+.cell-in.price::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+tfoot td{background:var(--band);font-weight:600;border:1px solid var(--ink)}
+tfoot .lab{text-align:center;font-size:13px;letter-spacing:.08em}
+tfoot .sum{font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;
+  text-align:right;white-space:nowrap;font-size:14.5px}
+tfoot tr.total td{background:var(--surface)}
+tfoot tr.total .sum{font-size:16px}
+
+/* --- 견적 조건 --- */
+.terms{margin:14px 0 0;border:1px solid var(--ink);background:var(--surface)}
+.terms h2{
+  margin:0;padding:6px 12px;font-size:12.5px;font-weight:600;letter-spacing:.14em;
+  background:var(--band);border-bottom:1px solid var(--ink);
+}
+.terms-grid{display:grid;grid-template-columns:1fr 1fr}
+.terms-grid .prow{border-bottom:1px solid var(--rule)}
+.terms-grid .prow:nth-child(even){border-left:1px solid var(--rule)}
+.terms-note{display:flex;align-items:stretch;border-top:1px solid var(--rule)}
+.terms-note > span{
+  flex:0 0 84px;display:flex;align-items:center;justify-content:center;
+  font-size:12px;color:var(--ink2);background:var(--paper);
+  border-right:1px solid var(--rule);padding:5px 4px;text-align:center;
+}
+.terms-note textarea{
+  flex:1 1 auto;min-width:0;min-height:62px;resize:vertical;
+  font-family:inherit;font-size:13px;color:var(--ink2);line-height:1.6;
+  background:none;border:0;padding:7px 10px;
+}
+.terms-note textarea:focus{outline:0;background:var(--paper)}
+
+.sign{margin:26px 0 0;text-align:center;font-size:14px;color:var(--ink2)}
+.sign .line{font-size:15px;color:var(--ink);margin-bottom:14px}
+.sign .who{font-family:"Gowun Batang","Batang",serif;font-size:19px;color:var(--ink)}
+.sign .who b{font-weight:700;margin:0 10px}
+.sign .stamp{color:var(--ink3);font-size:12px;margin-left:6px}
+.sign .date{font-family:"IBM Plex Mono",monospace;font-size:14px;margin-bottom:12px;color:var(--ink2)}
+
+footer{margin-top:36px;padding-top:14px;border-top:1px solid var(--rule);
+  font-family:"IBM Plex Mono",monospace;font-size:11.5px;color:var(--ink3);
+  display:flex;gap:16px;flex-wrap:wrap}
+.loading{padding:36px 0;text-align:center;color:var(--ink3);font-size:14px}
+.error{border:1px solid var(--flag);background:#fbeeeb;color:var(--flag);
+  padding:14px 18px;margin:14px 0 0;font-size:13.5px}
+
+@media screen and (max-width:760px){
+  .parties,.terms-grid{grid-template-columns:1fr}
+  .party + .party{border-left:0;border-top:1px solid var(--ink)}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none !important;transition:none !important}}
+
+/* --- 인쇄 --- */
+@media print{
+  @page{size:A4 portrait;margin:13mm 11mm}
+  html,body{background:#fff}
+  body{font-size:9.5pt;line-height:1.3;color:#000}
+  .wrap{max-width:none;padding:0}
+  .panel,.acts,footer,.hint{display:none !important}
+
+  .mast{padding:0}
+  h1{font-size:26pt}
+  .mast-rule{height:2pt;background:#000;margin-top:7px}
+  .mast-meta{font-size:9pt;margin-top:7px;color:#000}
+  .mast-meta input{font-size:9pt;color:#000;border-bottom-color:#999;min-width:0}
+  .mast-meta input::placeholder{color:transparent}
+
+  /* 좁은 화면용 규칙이 A4 본문 폭에 걸리지 않도록 위에서 screen 으로 한정했다 */
+  .parties{margin-top:10px;border-width:1.2pt;grid-template-columns:1fr 1fr}
+  .party + .party{border-left:.6pt solid #000}
+  .party h2{padding:4px 8px;font-size:9pt;border-bottom:.6pt solid #000;
+    background:#e6e6e6;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .prow{border-bottom:.4pt solid #bbb}
+  .prow > span{flex-basis:64px;font-size:8.5pt;padding:3px;background:none;
+    border-right:.4pt solid #bbb;color:#000}
+  .prow input{font-size:9.5pt;padding:3px 7px;color:#000}
+  .prow input::placeholder{color:transparent}
+  .prow .strong{font-size:10pt}
+  input[type=date]::-webkit-calendar-picker-indicator{display:none}
+  .seal{flex-basis:36px;font-size:8pt;color:#555}
+
+  .grand{margin-top:9px;border-width:1.2pt}
+  .grand h2{flex-basis:78px;font-size:9pt;border-right:.6pt solid #000;
+    background:#e6e6e6;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .grand-body{padding:7px 12px}
+  .grand-han{font-size:15pt}
+  .grand-num{font-size:13pt}
+  .grand-note{font-size:8pt;color:#333}
+
+  .spec{margin-top:9px}
+  .scroll{overflow:visible !important}
+  table{font-size:8.5pt;min-width:0}
+  thead{display:table-header-group}
+  tfoot{display:table-row-group}
+  tr{break-inside:avoid}
+  th{padding:3px 4px;font-size:8pt;border:.7pt solid #000;background:#e6e6e6;
+    -webkit-print-color-adjust:exact;print-color-adjust:exact}
+  td{padding:2.5px 5px;border:.4pt solid #999;background:none}
+  .cell-in{border:0;background:none;padding:0;color:#000;box-shadow:none}
+  .cell-in.rem{font-size:8pt}
+  tfoot td{background:none;border:.7pt solid #000}
+  tfoot .sum{font-size:9.5pt}
+  tfoot tr.total .sum{font-size:11pt}
+
+  .terms{margin-top:9px;border-width:.7pt;break-inside:avoid}
+  .terms h2{padding:3px 8px;font-size:8.5pt;border-bottom:.6pt solid #000;
+    background:#e6e6e6;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .terms-note textarea{font-size:8.5pt;min-height:0;height:auto;overflow:visible;
+    resize:none;color:#000;padding:4px 7px}
+  .terms-note > span{flex-basis:64px;font-size:8.5pt;background:none;color:#000}
+
+  .sign{margin-top:16px;color:#000}
+  .sign .line{font-size:10.5pt;margin-bottom:9px}
+  .sign .date{font-size:10pt;margin-bottom:8px;color:#000}
+  .sign .who{font-size:13pt}
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+<header class="mast">
+  <h1>견적서</h1>
+  <div class="mast-rule"></div>
+  <div class="mast-meta">
+    <label>견적번호 <input id="qNo" placeholder="Q-20260905-01"></label>
+    <label>견적일자 <input id="qDate" type="date"></label>
+    <label>공고 · 요청번호 <input id="gNotice" placeholder="공고 / 요청번호"></label>
+  </div>
+</header>
+
+<section class="parties">
+  <div class="party">
+    <h2>공급받는자</h2>
+    <div class="prow"><span>기관명</span><input id="gOrg" class="strong" placeholder="기관명"></div>
+    <div class="prow"><span>부서</span><input id="gDept" placeholder="부서"></div>
+    <div class="prow"><span>담당자</span><input id="gPerson" placeholder="직위 · 성명"></div>
+    <div class="prow"><span>전화</span><input id="gTel" placeholder="전화 / 팩스"></div>
+    <div class="prow"><span>주소</span><input id="gAddr" placeholder="기관 주소"></div>
+    <div class="prow"><span>현장</span><input id="gSite" placeholder="의령경찰서 신축현장"></div>
+  </div>
+  <div class="party">
+    <h2>공급자</h2>
+    <div class="prow"><span>등록번호</span><input id="pBizNo" placeholder="사업자등록번호"></div>
+    <div class="prow"><span>상호</span><input id="pCo" class="strong" placeholder="상호 (법인명)"></div>
+    <div class="prow"><span>성명</span><input id="pCeo" placeholder="대표자 성명"><span class="seal">(인)</span></div>
+    <div class="prow"><span>사업장</span><input id="pAddr" placeholder="사업장 주소"></div>
+    <div class="prow split">
+      <div class="half"><span>업태</span><input id="pBiz" placeholder="업태"></div>
+      <div class="half"><span>종목</span><input id="pItem" placeholder="종목"></div>
+    </div>
+    <div class="prow"><span>연락처</span><input id="pTel" placeholder="전화 / 팩스 · 담당자"></div>
+  </div>
+</section>
+
+<section class="grand">
+  <h2>합계금액</h2>
+  <div class="grand-body">
+    <span class="grand-han" id="grandHan">일금 영원정</span>
+    <span class="grand-num" id="grandNum">₩0</span>
+    <p class="grand-note" id="grandNote">단가를 넣으면 금액이 계산됩니다</p>
+  </div>
+</section>
+
+<section class="panel">
+  <h2>작성 설정 <span class="hint">— 이 칸은 인쇄되지 않습니다</span></h2>
+  <div class="panel-row">
+    <label>블라인드 기본 단가 <input type="number" id="priceBlind" min="0" step="1000" value="0" inputmode="numeric"> 원/㎡</label>
+    <label>커튼 기본 단가 <input type="number" id="priceCurtain" min="0" step="1000" value="0" inputmode="numeric"> 원/㎡</label>
+    <button type="button" class="btn" id="resetLines">줄 입력 되돌리기</button>
+    <span class="hint">명세의 품명·규격·단가·비고는 직접 고칠 수 있습니다</span>
+  </div>
+  <div class="panel-row">
+    <label>명세 단위
+      <select id="modeSel">
+        <option value="floor">층 · 품목별</option>
+        <option value="group">구역 · 품목별</option>
+        <option value="prod">품목별</option>
+      </select>
+    </label>
+    <label>과세
+      <select id="vatSel">
+        <option value="add">과세 (공급가액 · 세액 구분)</option>
+        <option value="none">면세</option>
+      </select>
+    </label>
+    <label><input type="checkbox" id="showCount"> 규격에 건수 표기</label>
+    <span class="acts">
+      <a class="btn" href="./index.html">실측대장</a>
+      <a class="btn" href="./quote.html">자사 견적서</a>
+      <button type="button" class="btn" id="printBtn">인쇄 · PDF로 저장</button>
+    </span>
+  </div>
+</section>
+
+<section class="spec">
+  <div class="scroll" id="specWrap">
+    <p class="loading" id="loading">실측대장을 읽는 중…</p>
+  </div>
+</section>
+
+<section class="terms">
+  <h2>견 적 조 건</h2>
+  <div class="terms-grid">
+    <div class="prow"><span>유효기간</span><input id="cValid" placeholder="견적일로부터 30일"></div>
+    <div class="prow"><span>납품기한</span><input id="cDue" placeholder="계약일로부터 00일 이내"></div>
+    <div class="prow"><span>납품장소</span><input id="cPlace" placeholder="의령경찰서 신축현장"></div>
+    <div class="prow"><span>결제조건</span><input id="cPay" placeholder="납품 검수 후 00일 이내"></div>
+    <div class="prow"><span>하자보증</span><input id="cWarranty" placeholder="준공일로부터 00년"></div>
+    <div class="prow"><span>인도조건</span><input id="cDeliver" placeholder="현장 시공 · 설치 포함"></div>
+  </div>
+  <div class="terms-note"><span>비고</span><textarea id="cNotes" placeholder="산출 근거, 제외 항목, 재실측 대상 등을 적습니다."></textarea></div>
+</section>
+
+<p class="sign">
+  <span class="line">위와 같이 견적서를 제출합니다.</span><br>
+  <span class="date" id="signDate">—</span><br>
+  <span class="who">상호 <b id="signCo">—</b> 대표자 <b id="signCeo">—</b><span class="stamp">(인)</span></span>
+</p>
+
+<footer>
+  <span>실측대장에서 자동 집계 · 수량을 고치려면 대장에서 수정하세요</span>
+  <span id="syncNote"></span>
+  <span id="baseNote"></span>
+</footer>
+
+</div>
+
+<script src="./quote-core.js"></script>
+<script>
+(function () {
+  "use strict";
+
+  /* 수량 계산은 quote-core.js 한 곳에서 한다 — 자사 견적서와 값이 갈리면 안 된다. */
+  var L = window.Ledger;
+  var STORE = "uiryeong-quote-public-v1";
+
+  var rows = [];
+  var base = L.readBase();
+  var price = { blind: 0, curtain: 0 };
+  var lineOv = {};
+
+  var elSpec = document.getElementById("specWrap");
+  var elLoading = document.getElementById("loading");
+  var elGrandHan = document.getElementById("grandHan");
+  var elGrandNum = document.getElementById("grandNum");
+  var elGrandNote = document.getElementById("grandNote");
+  var elSyncNote = document.getElementById("syncNote");
+  var elBaseNote = document.getElementById("baseNote");
+  var elMode = document.getElementById("modeSel");
+  var elVat = document.getElementById("vatSel");
+  var elCount = document.getElementById("showCount");
+  var elPriceB = document.getElementById("priceBlind");
+  var elPriceC = document.getElementById("priceCurtain");
+  var elResetLines = document.getElementById("resetLines");
+
+  var FIELDS = ["gOrg", "gDept", "gPerson", "gTel", "gAddr", "gSite", "gNotice",
+    "pBizNo", "pCo", "pCeo", "pAddr", "pBiz", "pItem", "pTel",
+    "cValid", "cDue", "cPlace", "cPay", "cWarranty", "cDeliver", "cNotes",
+    "qDate", "qNo"];
+
+  /* ---- 그리기 ---- */
+  function ovKey(mode, key) { return mode + "|" + key; }
+  function defaultPrice(prod) { return prod === "커튼" ? price.curtain : price.blind; }
+
+  function render() {
+    if (!rows.length) return;
+
+    var mode = elMode.value;
+    var items = L.aggregate(rows, mode, base);
+    var showN = elCount.checked;
+
+    var html = '<table>'
+      + '<colgroup><col style="width:5%"><col style="width:15%"><col style="width:20%">'
+      + '<col style="width:5%"><col style="width:9%"><col style="width:11%">'
+      + '<col style="width:13%"><col style="width:11%"><col style="width:11%"></colgroup>'
+      + '<thead><tr><th>번호</th><th>품명</th><th>규격</th><th>단위</th><th>수량</th>'
+      + '<th>단가</th><th>공급가액</th><th>세액</th><th>비고</th></tr></thead><tbody>';
+
+    items.forEach(function (e, i) {
+      var ov = lineOv[ovKey(mode, e.key)] || {};
+      var name = typeof ov.name === "string" ? ov.name : e.prod;
+      var spec = typeof ov.spec === "string"
+        ? ov.spec
+        : L.specOf(e, mode) + (showN ? " (" + e.n + "건)" : "");
+      var rem = typeof ov.rem === "string" ? ov.rem : "";
+      var unit = Object.prototype.hasOwnProperty.call(ov, "price")
+        ? (ov.price == null ? "" : ov.price)
+        : (defaultPrice(e.prod) || "");
+
+      html += '<tr data-key="' + L.attr(e.key) + '" data-qty="' + e.qty + '" data-n="' + e.n + '">'
+        + '<td class="c-no">' + (i + 1) + '</td>'
+        + '<td><input class="cell-in name" value="' + L.attr(name) + '" aria-label="품명"></td>'
+        + '<td><input class="cell-in specin" value="' + L.attr(spec) + '" aria-label="규격"></td>'
+        + '<td class="c-unit">㎡</td>'
+        + '<td class="c-qty">' + L.num(e.qty) + '</td>'
+        + '<td class="c-price"><input class="cell-in price" type="text" inputmode="numeric" value="'
+        + L.attr(unit === "" ? "" : Number(unit).toLocaleString("ko-KR")) + '" aria-label="단가"></td>'
+        + '<td class="c-supply">—</td>'
+        + '<td class="c-tax">—</td>'
+        + '<td><input class="cell-in rem" value="' + L.attr(rem) + '" aria-label="비고"></td>'
+        + '</tr>';
+    });
+
+    html += '</tbody><tfoot>'
+      + '<tr><td class="lab" colspan="4">합 계</td>'
+      + '<td class="sum" id="sumQty">—</td><td class="lab">—</td>'
+      + '<td class="sum" id="sumSupply">—</td><td class="sum" id="sumTax">—</td>'
+      + '<td class="lab" id="sumCount">—</td></tr>'
+      + '<tr class="total"><td class="lab" colspan="6">합계금액 (공급가액 + 세액)</td>'
+      + '<td class="sum" colspan="2" id="sumTotal">—</td><td></td></tr>'
+      + '</tfoot></table>';
+
+    elSpec.innerHTML = html;
+    recalc();
+  }
+
+  /* ---- 금액 계산 — 줄마다 원 단위로 끊어야 줄의 합이 합계와 맞는다 ---- */
+  function recalc() {
+    var trs = elSpec.querySelectorAll("tbody tr");
+    if (!trs.length) return;
+
+    var taxed = elVat.value === "add";
+    var supplyAll = 0, taxAll = 0, qtyAll = 0, nAll = 0, priced = 0;
+
+    trs.forEach(function (tr) {
+      var qty = parseFloat(tr.getAttribute("data-qty")) || 0;
+      var v = L.priceValue(tr.querySelector("input.price").value);
+      var unit = isFinite(v) && v > 0 ? v : 0;
+      var supply = Math.round(qty * unit);
+      var tax = taxed ? Math.round(supply * 0.1) : 0;
+
+      supplyAll += supply; taxAll += tax;
+      qtyAll += qty; nAll += parseInt(tr.getAttribute("data-n"), 10) || 0;
+      if (unit) priced++;
+
+      tr.querySelector(".c-supply").textContent = unit ? L.money(supply) : "—";
+      tr.querySelector(".c-tax").textContent = unit ? L.money(tax) : (taxed ? "—" : "0");
+    });
+
+    qtyAll = Math.round(qtyAll * 100) / 100;
+    var total = supplyAll + taxAll;
+
+    function put(id, text) {
+      var el = document.getElementById(id);
+      if (el) el.textContent = text;
+    }
+    put("sumQty", L.num(qtyAll));
+    put("sumCount", nAll + "건");
+    put("sumSupply", L.money(supplyAll));
+    put("sumTax", L.money(taxAll));
+    put("sumTotal", L.money(total));
+
+    elGrandHan.textContent = "일금 " + L.hangulAmount(total) + "원정";
+    elGrandNum.textContent = L.won(total);
+    elGrandNote.textContent = priced
+      ? "총 " + L.num(qtyAll) + "㎡ · " + nAll + "건 · "
+        + (taxed ? "부가가치세 별도 표기 (공급가액 " + L.money(supplyAll)
+          + "원 + 세액 " + L.money(taxAll) + "원)" : "면세")
+      : "단가를 넣으면 금액이 계산됩니다 · 총 " + L.num(qtyAll) + "㎡ · " + nAll + "건";
+
+    elBaseNote.textContent = L.baseNote(base);
+  }
+
+  /* ---- 명세 줄 직접 입력 ---- */
+  elSpec.addEventListener("input", function (ev) {
+    var el = ev.target;
+    if (!el.classList || !el.classList.contains("cell-in")) return;
+    var tr = el.closest("tr");
+    if (!tr) return;
+
+    var k = ovKey(elMode.value, tr.getAttribute("data-key"));
+    var ov = lineOv[k] || (lineOv[k] = {});
+    if (el.classList.contains("name")) ov.name = el.value;
+    else if (el.classList.contains("specin")) ov.spec = el.value;
+    else if (el.classList.contains("rem")) ov.rem = el.value;
+    else {
+      var v = L.priceValue(el.value);
+      ov.price = el.value.trim() === "" ? null : (isFinite(v) && v > 0 ? v : 0);
+      recalc();
+    }
+    save();
+  });
+
+  // 칸에서 손을 떼면 천 단위를 다시 붙인다.
+  elSpec.addEventListener("blur", function (ev) {
+    var el = ev.target;
+    if (!el.classList || !el.classList.contains("price")) return;
+    var v = L.priceValue(el.value);
+    el.value = (el.value.trim() === "" || !isFinite(v)) ? "" : v.toLocaleString("ko-KR");
+  }, true);
+
+  elResetLines.addEventListener("click", function () {
+    if (!Object.keys(lineOv).length) return;
+    if (!window.confirm("명세에 직접 적은 품명·규격·단가·비고를 모두 되돌릴까요?")) return;
+    lineOv = {};
+    render();
+    save();
+  });
+
+  /* ---- 입력값 저장 ---- */
+  function save() {
+    var data = { price: price, mode: elMode.value, vat: elVat.value,
+      count: elCount.checked, lines: lineOv };
+    FIELDS.forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) data[id] = el.value;
+    });
+    try { localStorage.setItem(STORE, JSON.stringify(data)); } catch (e) { /* 무시 */ }
+  }
+
+  function load() {
+    var data = {};
+    try { data = JSON.parse(localStorage.getItem(STORE) || "{}") || {}; }
+    catch (e) { data = {}; }
+
+    FIELDS.forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el && typeof data[id] === "string") el.value = data[id];
+    });
+    if (data.price) {
+      price.blind = parseFloat(data.price.blind) > 0 ? parseFloat(data.price.blind) : 0;
+      price.curtain = parseFloat(data.price.curtain) > 0 ? parseFloat(data.price.curtain) : 0;
+    }
+    elPriceB.value = String(price.blind);
+    elPriceC.value = String(price.curtain);
+    if (data.lines && typeof data.lines === "object") lineOv = data.lines;
+    if (data.mode) elMode.value = data.mode;
+    if (data.vat) elVat.value = data.vat;
+    elCount.checked = !!data.count;
+
+    var d = document.getElementById("qDate");
+    if (!d.value) {
+      var t = new Date();
+      d.value = t.getFullYear() + "-" + ("0" + (t.getMonth() + 1)).slice(-2)
+        + "-" + ("0" + t.getDate()).slice(-2);
+    }
+    if (!document.getElementById("gSite").value) {
+      document.getElementById("gSite").value = "의령경찰서 신축현장";
+    }
+  }
+
+  function reflect() {
+    var d = document.getElementById("qDate").value;
+    document.getElementById("signDate").textContent = d ? d.replace(/-/g, ". ") + "." : "—";
+    document.getElementById("signCo").textContent =
+      document.getElementById("pCo").value.trim() || "—";
+    document.getElementById("signCeo").textContent =
+      document.getElementById("pCeo").value.trim() || "—";
+  }
+
+  /* ---- 조작 ---- */
+  function onPrice() {
+    var b = parseFloat(elPriceB.value), c = parseFloat(elPriceC.value);
+    price.blind = isFinite(b) && b > 0 ? b : 0;
+    price.curtain = isFinite(c) && c > 0 ? c : 0;
+    render();
+    save();
+  }
+  elPriceB.addEventListener("input", onPrice);
+  elPriceC.addEventListener("input", onPrice);
+  [elMode, elVat, elCount].forEach(function (el) {
+    el.addEventListener("change", function () { render(); save(); });
+  });
+  FIELDS.forEach(function (id) {
+    var el = document.getElementById(id);
+    if (el) el.addEventListener("input", function () { reflect(); save(); });
+  });
+
+  document.getElementById("printBtn").addEventListener("click", function () {
+    if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+    window.print();
+  });
+
+  // 비고는 종이에서 잘리지 않도록 내용만큼 늘려 둔다.
+  function growNotes() {
+    var t = document.getElementById("cNotes");
+    t.style.height = "auto";
+    t.style.height = Math.max(62, t.scrollHeight) + "px";
+  }
+  document.getElementById("cNotes").addEventListener("input", growNotes);
+  window.addEventListener("beforeprint", growNotes);
+
+  /* ---- 시작 ---- */
+  load();
+  reflect();
+
+  L.load(function (err, read) {
+    if (err) {
+      elSpec.innerHTML = '<p class="error">' + L.attr(err.message)
+        + ' — 이 페이지는 실측대장(index.html)과 같은 주소에서 열어야 합니다.</p>';
+      return;
+    }
+    rows = read.rows;
+    elSyncNote.textContent = read.edited
+      ? "대장에서 고친 " + read.edited + "건 반영됨"
+      : "대장 원본 그대로";
+    if (elLoading) elLoading.remove();
+    render();
+    growNotes();
+  });
+})();
+</script>
+</body>
+</html>

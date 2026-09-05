@@ -331,7 +331,8 @@ footer{margin-top:40px;padding-top:14px;border-top:1px solid var(--rule);
     </label>
     <label><input type="checkbox" id="showCount"> 수량 옆에 건수 표기</label>
     <span class="acts">
-      <a class="btn" href="./index.html">실측대장으로</a>
+      <a class="btn" href="./index.html">실측대장</a>
+      <a class="btn" href="./quote-public.html">공공기관용</a>
       <button type="button" class="btn" id="printBtn">인쇄 · PDF로 저장</button>
     </span>
   </div>
@@ -369,18 +370,17 @@ footer{margin-top:40px;padding-top:14px;border-top:1px solid var(--rule);
 
 </div>
 
+<script src="./quote-core.js"></script>
 <script>
 (function () {
   "use strict";
 
-  /* 대장과 같은 저장소를 본다 — 대장에서 고친 값과 기준이 그대로 견적에 반영되어야 한다. */
-  var ROWS_STORAGE = "uiryeong-rows-v1";
-  var BASE_STORAGE = "uiryeong-base-v2";
+  /* 수량 계산은 quote-core.js 한 곳에서 한다 — 견적서가 여러 벌이어도 값이 갈리지 않아야 한다. */
+  var L = window.Ledger;
   var QUOTE_STORAGE = "uiryeong-quote-v1";
-  var BASE_DEFAULT = { blind: 2, curtain: 0 };
 
   var rows = [];
-  var base = { blind: BASE_DEFAULT.blind, curtain: BASE_DEFAULT.curtain };
+  var base = L.readBase();
   var price = { blind: 0, curtain: 0 };
   // 명세 줄에 직접 적은 품명·단가. 명세 단위마다 줄이 달라지므로 단위까지 키에 넣는다.
   var lineOv = {};
@@ -402,159 +402,17 @@ footer{margin-top:40px;padding-top:14px;border-top:1px solid var(--rule);
   var FIELDS = ["fToSite", "fTo", "fToPerson", "fToTel", "fDate", "fNo",
     "fCo", "fBizNo", "fCeo", "fAddr", "fTel", "fStaff", "fNotes"];
 
-  /* ---- 숫자 ---- */
-  function won(n) { return "₩" + Math.round(n).toLocaleString("ko-KR"); }
-  function num(n, d) { return n.toFixed(d == null ? 2 : d).replace(/\B(?=(\d{3})+(?!\d))/g, ","); }
-
-  // 견적서에는 한글 금액을 함께 적는 것이 관례다.
-  function hangulAmount(n) {
-    n = Math.round(n);
-    if (!n) return "영";
-    var digit = ["", "일", "이", "삼", "사", "오", "육", "칠", "팔", "구"];
-    var small = ["", "십", "백", "천"];
-    var big = ["", "만", "억", "조", "경"];
-    var str = String(n), groups = [];
-    while (str.length) { groups.push(str.slice(-4)); str = str.slice(0, -4); }
-    var out = "";
-    for (var g = groups.length - 1; g >= 0; g--) {
-      var grp = groups[g], part = "";
-      for (var i = 0; i < grp.length; i++) {
-        var d = +grp[i], pos = grp.length - 1 - i;
-        if (!d) continue;
-        part += (d === 1 && pos > 0 ? "" : digit[d]) + small[pos];
-      }
-      if (part) out += part + big[g];
-    }
-    return out;
-  }
-
-  /* ---- 대장 읽기 ---- */
-  // 헤베는 소수 둘째 자리에서 올려 첫째 자리까지 남긴다 (3.53 → 3.6, 표기는 3.60).
-  // 부동소수 오차로 3.50이 3.60이 되지 않도록 아주 작은 값을 먼저 덜어낸다.
-  function ceilArea(n) { return Math.ceil(n * 10 - 1e-9) / 10; }
-
-  function parseDim(text) {
-    var m = /^([0-9]+(?:\.[0-9]+)?)\s*[×xX*]\s*([0-9]+(?:\.[0-9]+)?)$/
-      .exec(String(text == null ? "" : text).replace(/\s+/g, " ").trim());
-    return m ? { w: parseFloat(m[1]), h: parseFloat(m[2]) } : null;
-  }
-
-  // 대장의 품목 기본값 규칙과 같아야 한다 — "커튼박스"는 제품이 아니라 창틀 이야기다.
-  function guessProd(text) {
-    var t = String(text || "").replace(/커튼박스/g, "");
-    if (/롤/.test(t)) return "블라인드";
-    if (/커튼/.test(t)) return "커튼";
-    return "블라인드";
-  }
-
-  function cellText(tr, cls) {
-    var td = tr.querySelector("." + cls);
-    return td ? td.textContent.trim() : "";
-  }
-
-  function readLedger(doc) {
-    var cache = {};
-    try { cache = JSON.parse(localStorage.getItem(ROWS_STORAGE) || "{}") || {}; }
-    catch (e) { cache = {}; }
-
-    var edited = 0;
-    var out = [];
-    doc.querySelectorAll(".floor").forEach(function (floor) {
-      // 행 번호는 대장과 똑같이 구역 id에서 뽑는다.
-      var fi = /^s\d+$/.test(floor.id) ? floor.id.slice(1) : floor.id;
-      var h2 = floor.querySelector(".floor-head h2");
-      var floorName = h2 ? h2.textContent.trim() : floor.id;
-
-      floor.querySelectorAll(".grp").forEach(function (grp, gi) {
-        var h3 = grp.querySelector(".grp-head h3");
-        var groupName = h3 ? h3.textContent.trim() : "";
-        var trs = Array.prototype.slice.call(grp.querySelectorAll("tbody tr"))
-          .filter(function (tr) { return tr.querySelector(".dim"); });
-
-        trs.forEach(function (tr, ri) {
-          var id = "f" + fi + "-g" + gi + "-r" + ri;
-          var saved = cache[id];
-          if (saved) edited++;
-
-          var dim = saved && typeof saved.dim === "string" ? saved.dim : cellText(tr, "dim");
-          var loc = saved && typeof saved.loc === "string" ? saved.loc : cellText(tr, "loc");
-          var rem = saved && typeof saved.rem === "string" ? saved.rem : cellText(tr, "rem");
-          var prod = saved && typeof saved.prod === "string"
-            ? saved.prod
-            : guessProd(tr.textContent);
-
-          var d = parseDim(dim);
-          if (!d) return;
-
-          out.push({
-            floor: floorName, group: groupName, loc: loc, dim: dim, rem: rem,
-            prod: prod, raw: ceilArea(d.w * d.h / 10000)
-          });
-        });
-      });
-    });
-
-    elSyncNote.textContent = edited
-      ? "대장에서 고친 " + edited + "건 반영됨"
-      : "대장 원본 그대로";
-    return out;
-  }
-
-  function usedArea(r) {
-    var b = r.prod === "커튼" ? base.curtain : base.blind;
-    return Math.max(r.raw, b);
-  }
-
-  /* ---- 집계 ---- */
-  function aggregate(mode) {
-    var keyOf = mode === "prod"
-      ? function (r) { return r.prod; }
-      : mode === "group"
-        ? function (r) { return r.floor + "\u0001" + r.group + "\u0001" + r.prod; }
-        : function (r) { return r.floor + "\u0001" + r.prod; };
-
-    var map = {}, order = [];
-    rows.forEach(function (r) {
-      var k = keyOf(r);
-      if (!map[k]) {
-        map[k] = { key: k, prod: r.prod, floor: r.floor, group: r.group,
-          qty: 0, raw: 0, n: 0, lifted: 0 };
-        order.push(k);
-      }
-      var e = map[k], u = usedArea(r);
-      e.qty += u; e.raw += r.raw; e.n++;
-      if (u > r.raw + 0.0001) e.lifted++;
-    });
-    return order.map(function (k) { return map[k]; });
-  }
-
-  function specOf(e, mode) {
-    if (mode === "prod") return "전 구역";
-    if (mode === "group") return e.floor + " · " + e.group;
-    return e.floor;
-  }
-
   /* ---- 그리기 ---- */
-  function attr(v) {
-    return String(v == null ? "" : v)
-      .replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-  }
-
   function ovKey(mode, key) { return mode + "|" + key; }
 
   function defaultPrice(prod) { return prod === "커튼" ? price.curtain : price.blind; }
 
-  // 천 단위 쉼표가 섞여 들어와도 숫자로 읽는다.
-  function priceValue(text) {
-    var v = parseFloat(String(text).replace(/[^0-9.]/g, ""));
-    return isFinite(v) ? v : NaN;
-  }
 
   function render() {
     if (!rows.length) return;
 
     var mode = elMode.value;
-    var items = aggregate(mode);
+    var items = L.aggregate(rows, mode, base);
     var showN = elCount.checked;
 
     var html = '<table>'
@@ -572,17 +430,17 @@ footer{margin-top:40px;padding-top:14px;border-top:1px solid var(--rule);
         ? (ov.price == null ? "" : ov.price)
         : (defaultPrice(e.prod) || "");
 
-      html += '<tr data-key="' + attr(e.key) + '" data-qty="' + e.qty + '" data-n="' + e.n + '">'
+      html += '<tr data-key="' + L.attr(e.key) + '" data-qty="' + e.qty + '" data-n="' + e.n + '">'
         + '<td class="c-no">' + (i + 1) + '</td>'
-        + '<td class="c-name"><input class="cell-in name" value="' + attr(name)
+        + '<td class="c-name"><input class="cell-in name" value="' + L.attr(name)
         + '" aria-label="품명"></td>'
-        + '<td class="c-spec">' + specOf(e, mode)
+        + '<td class="c-spec">' + L.specOf(e, mode)
         + (showN ? ' <span class="c-rem">' + e.n + '건</span>' : '') + '</td>'
-        + '<td class="c-qty">' + num(e.qty) + '</td>'
+        + '<td class="c-qty">' + L.num(e.qty) + '</td>'
         + '<td class="c-unit">㎡</td>'
         + '<td class="c-price"><input class="cell-in price" type="text"'
         + ' inputmode="numeric" value="'
-        + attr(unit === "" ? "" : Number(unit).toLocaleString("ko-KR"))
+        + L.attr(unit === "" ? "" : Number(unit).toLocaleString("ko-KR"))
         + '" aria-label="단가"></td>'
         + '<td class="c-amt">—</td>'
         + '</tr>';
@@ -611,7 +469,7 @@ footer{margin-top:40px;padding-top:14px;border-top:1px solid var(--rule);
     var supply = 0, qtyAll = 0, nAll = 0, priced = 0;
     trs.forEach(function (tr) {
       var qty = parseFloat(tr.getAttribute("data-qty")) || 0;
-      var v = priceValue(tr.querySelector("input.price").value);
+      var v = L.priceValue(tr.querySelector("input.price").value);
       var unit = isFinite(v) && v > 0 ? v : 0;
       var amount = Math.round(qty * unit);   // 줄마다 원 단위로 끊어야 줄의 합이 공급가액과 맞는다
       supply += amount;
@@ -630,7 +488,7 @@ footer{margin-top:40px;padding-top:14px;border-top:1px solid var(--rule);
       var el = document.getElementById(id);
       if (el) el.textContent = text;
     }
-    put("sumQty", num(qtyAll));
+    put("sumQty", L.num(qtyAll));
     put("sumCount", nAll + "건");
     put("sumNetto", netto.toLocaleString("ko-KR"));
     put("sumTax", tax.toLocaleString("ko-KR"));
@@ -639,17 +497,14 @@ footer{margin-top:40px;padding-top:14px;border-top:1px solid var(--rule);
     var taxRow = document.getElementById("taxRow");
     if (taxRow) taxRow.hidden = (vat === "none");
 
-    elGrandHan.textContent = "일금 " + hangulAmount(total) + "원정";
-    elGrandNum.textContent = won(total);
+    elGrandHan.textContent = "일금 " + L.hangulAmount(total) + "원정";
+    elGrandNum.textContent = L.won(total);
     elGrandNote.textContent = priced
-      ? "총 " + num(qtyAll) + "㎡ · " + nAll + "건 · "
+      ? "총 " + L.num(qtyAll) + "㎡ · " + nAll + "건 · "
         + (vat === "in" ? "부가세 포함" : vat === "none" ? "부가세 없음" : "부가세 별도")
-      : "단가를 넣으면 금액이 계산됩니다 · 총 " + num(qtyAll) + "㎡ · " + nAll + "건";
+      : "단가를 넣으면 금액이 계산됩니다 · 총 " + L.num(qtyAll) + "㎡ · " + nAll + "건";
 
-    elBasisBase.textContent = "기본 헤베 — 블라인드 "
-      + (base.blind > 0 ? num(base.blind) + "㎡" : "없음")
-      + " · 커튼 " + (base.curtain > 0 ? num(base.curtain) + "㎡" : "없음")
-      + ", 실측 헤베가 이보다 작으면 기본 헤베로 계산";
+    elBasisBase.textContent = L.baseNote(base);
   }
 
   /* ---- 명세 줄 직접 입력 ---- */
@@ -664,7 +519,7 @@ footer{margin-top:40px;padding-top:14px;border-top:1px solid var(--rule);
     if (el.classList.contains("name")) {
       ov.name = el.value;
     } else {
-      var v = priceValue(el.value);
+      var v = L.priceValue(el.value);
       ov.price = el.value.trim() === "" ? null : (isFinite(v) && v > 0 ? v : 0);
       recalc();
     }
@@ -674,7 +529,7 @@ footer{margin-top:40px;padding-top:14px;border-top:1px solid var(--rule);
   elSpec.addEventListener("blur", function (ev) {
     var el = ev.target;
     if (!el.classList || !el.classList.contains("price")) return;
-    var v = priceValue(el.value);
+    var v = L.priceValue(el.value);
     el.value = (el.value.trim() === "" || !isFinite(v)) ? "" : v.toLocaleString("ko-KR");
   }, true);
 
@@ -777,31 +632,20 @@ footer{margin-top:40px;padding-top:14px;border-top:1px solid var(--rule);
   loadForm();
   reflectHeader();
 
-  try {
-    var rawBase = JSON.parse(localStorage.getItem(BASE_STORAGE) || "null");
-    if (rawBase) {
-      base.blind = parseFloat(rawBase.blind) > 0 ? parseFloat(rawBase.blind) : 0;
-      base.curtain = parseFloat(rawBase.curtain) > 0 ? parseFloat(rawBase.curtain) : 0;
-    }
-  } catch (e) { /* 기본값을 쓴다 */ }
-
-  fetch("./index.html", { cache: "no-cache" })
-    .then(function (r) {
-      if (!r.ok) throw new Error("대장을 불러오지 못했습니다 (" + r.status + ")");
-      return r.text();
-    })
-    .then(function (html) {
-      var doc = new DOMParser().parseFromString(html, "text/html");
-      rows = readLedger(doc);
-      if (!rows.length) throw new Error("대장에서 실측 행을 찾지 못했습니다");
-      if (elLoading) elLoading.remove();
-      render();
-      growNotes();
-    })
-    .catch(function (e) {
-      elSpec.innerHTML = '<p class="error">' + (e && e.message ? e.message : "대장을 읽을 수 없습니다")
+  L.load(function (err, read) {
+    if (err) {
+      elSpec.innerHTML = '<p class="error">' + L.attr(err.message)
         + ' — 이 페이지는 실측대장(index.html)과 같은 주소에서 열어야 합니다.</p>';
-    });
+      return;
+    }
+    rows = read.rows;
+    elSyncNote.textContent = read.edited
+      ? "대장에서 고친 " + read.edited + "건 반영됨"
+      : "대장 원본 그대로";
+    if (elLoading) elLoading.remove();
+    render();
+    growNotes();
+  });
 })();
 </script>
 </body>
