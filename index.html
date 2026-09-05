@@ -1321,9 +1321,13 @@ tr.based .area .a-use{color:var(--clay)}
     return m ? { w: parseFloat(m[1]), h: parseFloat(m[2]) } : null;
   }
 
+  // 헤베는 둘째 자리에서 올린다. 부동소수 오차로 3.05가 3.06이 되지 않도록
+  // 아주 작은 값을 먼저 덜어낸다 (실측에서 나올 수 있는 자릿수보다 훨씬 작다).
+  function ceil2(n) { return Math.ceil(n * 100 - 1e-9) / 100; }
+
   function rawAreaOf(entry) {
     var d = parseDim(entry.dim ? entry.dim.textContent : "");
-    return d ? d.w * d.h / 10000 : null;
+    return d ? ceil2(d.w * d.h / 10000) : null;
   }
 
   function prodTextOf(td) {
@@ -1400,21 +1404,18 @@ tr.based .area .a-use{color:var(--clay)}
         sum += Math.max(raw, baseFor(prodTextOf(entry.prod)));
       });
       f.area = sum;
-      f.base = f.ids.length + "건 · " + sum.toFixed(1) + "㎡";
+      f.base = f.ids.length + "건 · " + fmt2(sum) + "㎡";
     });
 
-    if (elTotalArea) elTotalArea.textContent = allUse.toFixed(1);
+    if (elTotalArea) elTotalArea.textContent = fmt2(allUse);
 
     if (elBasisSum) {
-      var txt = "실측 합계 " + allRaw.toFixed(2) + "㎡";
       if (base.blind > 0 || base.curtain > 0) {
-        txt += "  →  적용 합계 " + allUse.toFixed(2) + "㎡ (기본 헤베 적용 " + lifted + "건, +"
-          + (allUse - allRaw).toFixed(2) + "㎡)";
-        elBasisSum.innerHTML = "실측 합계 " + allRaw.toFixed(2) + "㎡ → 적용 합계 <b>"
-          + allUse.toFixed(2) + "㎡</b> · 기본 헤베 적용 " + lifted + "건 (+"
-          + (allUse - allRaw).toFixed(2) + "㎡)";
+        elBasisSum.innerHTML = "실측 합계 " + fmt2(allRaw) + "㎡ → 적용 합계 <b>"
+          + fmt2(allUse) + "㎡</b> · 기본 헤베 적용 " + lifted + "건 (+"
+          + fmt2(allUse - allRaw) + "㎡)";
       } else {
-        elBasisSum.innerHTML = "실측 합계 <b>" + allRaw.toFixed(2)
+        elBasisSum.innerHTML = "실측 합계 <b>" + fmt2(allRaw)
           + "㎡</b> · 기본 헤베를 넣으면 그보다 작은 건은 기본 헤베로 계산합니다";
       }
     }
