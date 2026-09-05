@@ -135,7 +135,7 @@ table{width:100%;border-collapse:collapse;font-size:14.5px;table-layout:fixed;mi
 th{
   font-family:"IBM Plex Mono",monospace;font-size:11.5px;letter-spacing:.11em;
   text-transform:uppercase;color:var(--ink);font-weight:600;
-  text-align:left;padding:8px 14px;border-bottom:1.5px solid var(--ink3);white-space:nowrap;
+  text-align:center;padding:8px 14px;border-bottom:1.5px solid var(--ink3);white-space:nowrap;
 }
 td{padding:6px 14px;border-bottom:1px solid var(--rule);vertical-align:baseline}
 tr:last-child td{border-bottom:0}
@@ -246,9 +246,7 @@ footer{margin-top:48px;padding-top:16px;border-top:1px solid var(--rule);
 th.prod,td.prod{white-space:nowrap}
 .chip.b{background:var(--band);color:var(--ink2)}
 .chip.c{background:var(--clay-bg);color:var(--clay)}
-.a-raw{font-size:11px;color:var(--ink3);margin-right:6px;font-weight:400}
 tr.based .area .a-use{color:var(--clay)}
-tfoot .a-raw{font-size:11px}
 
 /* --- 인쇄 / PDF 출력 --- */
 .print-only{display:none}
@@ -269,7 +267,6 @@ tfoot .a-raw{font-size:11px}
     padding:6px 12px;margin:0 0 14px}
   .basis-top,.basis-fields{display:none}
   .basis-sum{margin:0;font-size:9pt;color:#000}
-  .a-raw{font-size:7.5pt;color:#555}
   tr.based .area .a-use{color:#000;font-weight:600}
 
   .mast{padding:0 0 9px;border-bottom:1.4pt solid #000}
@@ -1347,10 +1344,8 @@ tfoot .a-raw{font-size:11px}
 
   function fmt2(n) { return (Math.round(n * 100) / 100).toFixed(2); }
 
-  function areaHtml(used, raw) {
-    var html = "";
-    if (raw != null && used > raw + 0.0001) html += '<span class="a-raw">' + fmt2(raw) + ' →</span>';
-    return html + '<span class="a-use">' + fmt2(used) + '</span>';
+  function areaHtml(used) {
+    return '<span class="a-use">' + fmt2(used) + '</span>';
   }
 
   /* ---- 표 전체를 다시 계산해 화면에 반영 ---- */
@@ -1369,7 +1364,7 @@ tfoot .a-raw{font-size:11px}
         var up = used > raw + 0.0001;
         if (up) lifted++;
         entry.tr.classList.toggle("based", up);
-        entry.area.innerHTML = areaHtml(used, raw);
+        entry.area.innerHTML = areaHtml(used);
         entry.area.title = up
           ? "실측 " + fmt2(raw) + "㎡ · 기본 헤베 " + fmt2(used) + "㎡ 적용"
           : "실측 " + fmt2(raw) + "㎡";
@@ -1382,7 +1377,7 @@ tfoot .a-raw{font-size:11px}
         var fLoc = foot.querySelector(".loc");
         var fArea = foot.querySelector(".area");
         if (fLoc) fLoc.textContent = "합계 " + n + "건";
-        if (fArea) fArea.innerHTML = areaHtml(gUse, gRaw);
+        if (fArea) fArea.innerHTML = areaHtml(gUse);
       }
     });
 
