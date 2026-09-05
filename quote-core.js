@@ -62,7 +62,14 @@
     return m ? { w: parseFloat(m[1]), h: parseFloat(m[2]) } : null;
   }
 
-  // 대장의 품목 기본값 규칙과 같아야 한다 — "커튼박스"는 제품이 아니라 창틀 이야기다.
+  // 품명은 자유 입력이라, 기본 헤베를 고를 때는 이름에서 갈래만 읽는다.
+  // "커튼박스"는 제품이 아니라 창틀 이야기이므로 먼저 지운다.
+  function prodKind(name) {
+    var t = String(name || "").replace(/커튼박스/g, "");
+    return /커튼/.test(t) ? "커튼" : "블라인드";
+  }
+
+  // 대장의 품목 기본값 규칙과 같아야 한다.
   function guessProd(text) {
     var t = String(text || "").replace(/커튼박스/g, "");
     if (/롤/.test(t)) return "블라인드";
@@ -149,21 +156,23 @@
   /* ---- 집계 ---- */
 
   function usedArea(r, base) {
-    return Math.max(r.raw, r.prod === "커튼" ? base.curtain : base.blind);
+    return Math.max(r.raw, prodKind(r.prod) === "커튼" ? base.curtain : base.blind);
   }
 
   function aggregate(rows, mode, base) {
     var keyOf = mode === "prod"
       ? function (r) { return r.prod; }
-      : mode === "group"
-        ? function (r) { return r.floor + "\u0001" + r.group + "\u0001" + r.prod; }
-        : function (r) { return r.floor + "\u0001" + r.prod; };
+      : mode === "spec"
+        ? function (r) { return r.prod + "\u0001" + r.dim; }
+        : mode === "group"
+          ? function (r) { return r.floor + "\u0001" + r.group + "\u0001" + r.prod; }
+          : function (r) { return r.floor + "\u0001" + r.prod; };
 
     var map = {}, order = [];
     rows.forEach(function (r) {
       var k = keyOf(r);
       if (!map[k]) {
-        map[k] = { key: k, prod: r.prod, floor: r.floor, group: r.group,
+        map[k] = { key: k, prod: r.prod, floor: r.floor, group: r.group, dim: r.dim,
           qty: 0, raw: 0, n: 0, lifted: 0 };
         order.push(k);
       }
@@ -181,6 +190,7 @@
 
   function specOf(e, mode) {
     if (mode === "prod") return "전 구역";
+    if (mode === "spec") return e.dim;
     if (mode === "group") return e.floor + " · " + e.group;
     return e.floor;
   }
@@ -195,7 +205,7 @@
     BASE_DEFAULT: BASE_DEFAULT,
     ceilArea: ceilArea, num: num, won: won, money: money,
     hangulAmount: hangulAmount, priceValue: priceValue, attr: attr,
-    parseDim: parseDim, guessProd: guessProd,
+    parseDim: parseDim, guessProd: guessProd, prodKind: prodKind,
     readBase: readBase, load: load,
     usedArea: usedArea, aggregate: aggregate, specOf: specOf, baseNote: baseNote
   };

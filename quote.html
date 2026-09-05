@@ -317,9 +317,10 @@ footer{margin-top:40px;padding-top:14px;border-top:1px solid var(--rule);
   <div class="panel-row">
     <label>명세 단위
       <select id="modeSel">
-        <option value="floor">층 · 품목별</option>
-        <option value="group">구역 · 품목별</option>
-        <option value="prod">품목별</option>
+        <option value="floor">층 · 품명별</option>
+        <option value="group">구역 · 품명별</option>
+        <option value="spec">품명 · 규격(치수)별</option>
+        <option value="prod">품명별</option>
       </select>
     </label>
     <label>부가세
@@ -416,11 +417,10 @@ footer{margin-top:40px;padding-top:14px;border-top:1px solid var(--rule);
     var showN = elCount.checked;
 
     var html = '<table>'
-      + '<colgroup><col style="width:6%"><col style="width:17%"><col style="width:25%">'
-      + '<col style="width:13%"><col style="width:6%"><col style="width:14%">'
-      + '<col style="width:19%"></colgroup>'
-      + '<thead><tr><th>번호</th><th>품명</th><th>규격 · 구역</th><th>수량</th>'
-      + '<th>단위</th><th>단가</th><th>금액</th></tr></thead><tbody>';
+      + '<colgroup><col style="width:6%"><col style="width:18%"><col style="width:27%">'
+      + '<col style="width:14%"><col style="width:15%"><col style="width:20%"></colgroup>'
+      + '<thead><tr><th>번호</th><th>품명</th><th>규격 · 구역</th><th>수량 (㎡)</th>'
+      + '<th>단가 (원)</th><th>금액 (원)</th></tr></thead><tbody>';
 
     items.forEach(function (e, i) {
       var ov = lineOv[ovKey(mode, e.key)] || {};
@@ -437,7 +437,6 @@ footer{margin-top:40px;padding-top:14px;border-top:1px solid var(--rule);
         + '<td class="c-spec">' + L.specOf(e, mode)
         + (showN ? ' <span class="c-rem">' + e.n + '건</span>' : '') + '</td>'
         + '<td class="c-qty">' + L.num(e.qty) + '</td>'
-        + '<td class="c-unit">㎡</td>'
         + '<td class="c-price"><input class="cell-in price" type="text"'
         + ' inputmode="numeric" value="'
         + L.attr(unit === "" ? "" : Number(unit).toLocaleString("ko-KR"))
@@ -448,12 +447,12 @@ footer{margin-top:40px;padding-top:14px;border-top:1px solid var(--rule);
 
     html += '</tbody><tfoot>'
       + '<tr><td class="lab" colspan="3">수량 합계</td>'
-      + '<td class="sum" id="sumQty">—</td><td class="c-unit">㎡</td>'
+      + '<td class="sum" id="sumQty">—</td>'
       + '<td class="lab" colspan="2" id="sumCount">—</td></tr>'
-      + '<tr><td class="lab" colspan="6">공급가액</td><td class="sum" id="sumNetto">—</td></tr>'
-      + '<tr id="taxRow"><td class="lab" colspan="6" id="taxLab">부가가치세</td>'
+      + '<tr><td class="lab" colspan="5">공급가액</td><td class="sum" id="sumNetto">—</td></tr>'
+      + '<tr id="taxRow"><td class="lab" colspan="5" id="taxLab">부가가치세</td>'
       + '<td class="sum" id="sumTax">—</td></tr>'
-      + '<tr class="total"><td class="lab" colspan="6">합계금액</td>'
+      + '<tr class="total"><td class="lab" colspan="5">합계금액</td>'
       + '<td class="sum" id="sumTotal">—</td></tr>'
       + '</tfoot></table>';
 

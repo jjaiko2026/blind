@@ -208,7 +208,7 @@ body.only-todo .grp.all-done{display:none}
 .editable{cursor:text;border-radius:2px}
 .editable:hover{background:var(--band)}
 .editable:focus{outline:2px solid var(--pine);outline-offset:-2px;background:var(--surface)}
-.dir-toggle{cursor:pointer;text-align:left}
+.dir-toggle{cursor:pointer}
 .dir-toggle:hover{background:var(--band)}
 .dir-toggle:focus-visible{outline:2px solid var(--pine);outline-offset:-2px}
 
@@ -247,8 +247,8 @@ footer{margin-top:48px;padding-top:16px;border-top:1px solid var(--rule);
 
 /* 품목 · 적용 헤베 */
 th.prod,td.prod{white-space:nowrap}
-.chip.b{background:var(--band);color:var(--ink2)}
-.chip.c{background:var(--clay-bg);color:var(--clay)}
+td.prod{font-size:13.5px}
+td.prod.is-curtain{color:var(--clay)}
 tr.based .area .a-use{color:var(--clay)}
 
 /* --- 인쇄 / PDF 출력 --- */
@@ -271,6 +271,7 @@ tr.based .area .a-use{color:var(--clay)}
   .basis-top,.basis-fields{display:none}
   .basis-sum{margin:0;font-size:9pt;color:#000}
   tr.based .area .a-use{color:#000;font-weight:600}
+  td.prod.is-curtain{color:#000}
 
   .mast{padding:0 0 9px;border-bottom:1.4pt solid #000}
   h1{font-size:20pt}
@@ -412,9 +413,9 @@ tr.based .area .a-use{color:var(--clay)}
     <li><code>줄</code> — 조작 줄 길이</li>
     <li><code>오목창</code> — 커튼박스 없이 창틀 안쪽 실측</li>
     <li><code>롤</code> / <code>커튼</code> — 지정된 제품 형태</li>
-    <li><span class="chip b">블</span> / <span class="chip c">커</span> — 품목, <span class="screen-only">칸을 클릭하면 서로 바뀝니다</span><span class="print-only">블라인드 / 커튼</span></li>
+    <li><code>품목</code> — 제품명을 그대로 적습니다<span class="screen-only">. 이름에 "커튼"이 들어가면 커튼 기본 헤베를, 아니면 블라인드 기본 헤베를 씁니다</span></li>
     <li><code>면적</code> — 치수에서 자동 계산, 기본 헤베보다 작으면 기본 헤베로 올려 잡습니다</li>
-    <li class="screen-only">위치·치수·줄·비고 칸은 클릭해서 바로 고칠 수 있고, 함께 보는 모두에게 저장됩니다</li>
+    <li class="screen-only">품목·위치·치수·줄·비고 칸은 클릭해서 바로 고칠 수 있고, 함께 보는 모두에게 저장됩니다</li>
     <li>치수 단위는 원문 미표기 (cm 기준 추정)</li>
   </ul>
 </section>
@@ -1020,7 +1021,7 @@ tr.based .area .a-use{color:var(--clay)}
   var floors = [];
   var total = 0;
   var merged = false;
-  var COLW = ["4.5%", "5.5%", "30%", "13%", "11.5%", "5.5%", "5.5%", "24.5%"];
+  var COLW = ["4.5%", "13%", "24%", "12.5%", "11%", "5.5%", "5%", "24.5%"];
   var rowsMerged = false;
 
   var elNum = document.getElementById("progNum");
@@ -1113,25 +1114,11 @@ tr.based .area .a-use{color:var(--clay)}
     };
     rowMap.set(id, entry);
 
-    // 품목은 노트 표기에서 고르고, 칸을 눌러 바꾼다.
-    if (entry.prod && !entry.prod.querySelector(".chip")) renderProd(entry.prod, guessProd(tr));
-    if (entry.prod) {
-      entry.prod.classList.add("editable", "dir-toggle");
-      entry.prod.tabIndex = 0;
-      entry.prod.setAttribute("role", "button");
-      entry.prod.setAttribute("aria-label", "품목 전환 (블라인드 / 커튼)");
-      var flip = function () {
-        renderProd(entry.prod, prodTextOf(entry.prod) === "커튼" ? "블라인드" : "커튼");
-        saveRow(id, entry);
-      };
-      entry.prod.addEventListener("click", flip);
-      entry.prod.addEventListener("keydown", function (e) {
-        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); flip(); }
-      });
-    }
+    // 품명은 노트 표기에서 기본값을 잡고, 그 위에 원하는 제품명을 적는다.
+    if (entry.prod && !entry.prod.textContent.trim()) renderProd(entry.prod, guessProd(tr));
 
     // 면적은 치수에서 계산하므로 직접 고치지 않는다.
-    [entry.loc, entry.dim, entry.line, entry.rem].forEach(function (td) {
+    [entry.loc, entry.prod, entry.dim, entry.line, entry.rem].forEach(function (td) {
       if (!td) return;
       td.contentEditable = "true";
       td.spellcheck = false;
@@ -1139,6 +1126,7 @@ tr.based .area .a-use{color:var(--clay)}
       td.addEventListener("focus", function () { tr.dataset.editing = "1"; });
       td.addEventListener("blur", function () {
         delete tr.dataset.editing;
+        if (td === entry.prod) renderProd(td, prodTextOf(td));
         saveRow(id, entry);
       });
       td.addEventListener("keydown", function (e) {
@@ -1332,18 +1320,25 @@ tr.based .area .a-use{color:var(--clay)}
   }
 
   function prodTextOf(td) {
-    if (!td) return "블라인드";
-    return td.querySelector(".chip.c") ? "커튼" : "블라인드";
+    var t = td ? td.textContent.trim() : "";
+    return t || "블라인드";
   }
 
   function renderProd(td, value) {
     if (!td) return;
-    td.innerHTML = value === "커튼"
-      ? '<span class="chip c">커</span>'
-      : '<span class="chip b">블</span>';
+    td.textContent = value || "블라인드";
+    // 이름은 자유롭게 적되, 커튼 갈래는 색으로 구분해 둔다.
+    td.classList.toggle("is-curtain", prodKind(value) === "커튼");
   }
 
-  // 노트에 적힌 제품 표기에서 품목 기본값을 고른다. "커튼박스"는 제품이 아니라 창틀 이야기다.
+  // 품명은 자유 입력이라, 기본 헤베를 고를 때는 이름에서 갈래만 읽는다.
+  // "커튼박스"는 제품이 아니라 창틀 이야기이므로 먼저 지운다.
+  function prodKind(name) {
+    var t = String(name || "").replace(/커튼박스/g, "");
+    return /커튼/.test(t) ? "커튼" : "블라인드";
+  }
+
+  // 노트에 적힌 제품 표기에서 품명 기본값을 고른다.
   function guessProd(tr) {
     var t = (tr.textContent || "").replace(/커튼박스/g, "");
     if (/롤/.test(t)) return "블라인드";
@@ -1352,7 +1347,7 @@ tr.based .area .a-use{color:var(--clay)}
   }
 
   function baseFor(prod) {
-    return prod === "커튼" ? base.curtain : base.blind;
+    return prodKind(prod) === "커튼" ? base.curtain : base.blind;
   }
 
   function fmt2(n) { return (Math.round(n * 100) / 100).toFixed(2); }
