@@ -340,7 +340,7 @@ footer{margin-top:36px;padding-top:14px;border-top:1px solid var(--rule);
   <h2>작성 설정 <span class="hint">— 이 칸은 인쇄되지 않습니다</span></h2>
   <div class="panel-row">
     <label>블라인드 기본 단가 <input type="number" id="priceBlind" min="0" step="1000" value="0" inputmode="numeric"> 원/㎡</label>
-    <label>커튼 기본 단가 <input type="number" id="priceCurtain" min="0" step="1000" value="0" inputmode="numeric"> 원/㎡</label>
+    <label>커튼 기본 단가 <input type="number" id="priceCurtain" min="0" step="1000" value="0" inputmode="numeric"> 원/개</label>
     <button type="button" class="btn" id="resetLines">줄 입력 되돌리기</button>
     <span class="hint">명세의 품명·규격·단가·비고는 직접 고칠 수 있습니다</span>
   </div>
@@ -463,12 +463,13 @@ footer{margin-top:36px;padding-top:14px;border-top:1px solid var(--rule);
         ? (ov.price == null ? "" : ov.price)
         : (defaultPrice(e.prod) || "");
 
-      html += '<tr data-key="' + L.attr(e.key) + '" data-qty="' + e.qty + '" data-n="' + e.n + '">'
+      html += '<tr data-key="' + L.attr(e.key) + '" data-qty="' + e.bill + '"'
+        + ' data-unit="' + e.unit + '" data-n="' + e.n + '">'
         + '<td class="c-no">' + (i + 1) + '</td>'
         + '<td><input class="cell-in name" value="' + L.attr(name) + '" aria-label="품명"></td>'
         + '<td><input class="cell-in specin" value="' + L.attr(spec) + '" aria-label="규격"></td>'
-        + '<td class="c-unit">㎡</td>'
-        + '<td class="c-qty">' + L.num(e.qty) + '</td>'
+        + '<td class="c-unit">' + e.unit + '</td>'
+        + '<td class="c-qty">' + L.num(e.bill, e.unit === "개" ? 0 : 2) + '</td>'
         + '<td class="c-price"><input class="cell-in price" type="text" inputmode="numeric" value="'
         + L.attr(unit === "" ? "" : Number(unit).toLocaleString("ko-KR")) + '" aria-label="단가"></td>'
         + '<td class="c-supply">—</td>'
@@ -496,7 +497,7 @@ footer{margin-top:36px;padding-top:14px;border-top:1px solid var(--rule);
     if (!trs.length) return;
 
     var taxed = elVat.value === "add";
-    var supplyAll = 0, taxAll = 0, qtyAll = 0, nAll = 0, priced = 0;
+    var supplyAll = 0, taxAll = 0, nAll = 0, priced = 0, byUnit = {};
 
     trs.forEach(function (tr) {
       var qty = parseFloat(tr.getAttribute("data-qty")) || 0;
@@ -506,21 +507,22 @@ footer{margin-top:36px;padding-top:14px;border-top:1px solid var(--rule);
       var tax = taxed ? Math.round(supply * 0.1) : 0;
 
       supplyAll += supply; taxAll += tax;
-      qtyAll += qty; nAll += parseInt(tr.getAttribute("data-n"), 10) || 0;
+      byUnit[tr.getAttribute("data-unit") || "㎡"] =
+        (byUnit[tr.getAttribute("data-unit") || "㎡"] || 0) + qty;
+      nAll += parseInt(tr.getAttribute("data-n"), 10) || 0;
       if (unit) priced++;
 
       tr.querySelector(".c-supply").textContent = unit ? L.money(supply) : "—";
       tr.querySelector(".c-tax").textContent = unit ? L.money(tax) : (taxed ? "—" : "0");
     });
 
-    qtyAll = Math.round(qtyAll * 100) / 100;
     var total = supplyAll + taxAll;
 
     function put(id, text) {
       var el = document.getElementById(id);
       if (el) el.textContent = text;
     }
-    put("sumQty", L.num(qtyAll));
+    put("sumQty", L.qtySummary(byUnit));
     put("sumCount", nAll + "건");
     put("sumSupply", L.money(supplyAll));
     put("sumTax", L.money(taxAll));
@@ -529,10 +531,10 @@ footer{margin-top:36px;padding-top:14px;border-top:1px solid var(--rule);
     elGrandHan.textContent = "일금 " + L.hangulAmount(total) + "원정";
     elGrandNum.textContent = L.won(total);
     elGrandNote.textContent = priced
-      ? "총 " + L.num(qtyAll) + "㎡ · " + nAll + "건 · "
+      ? "총 " + L.qtySummary(byUnit) + " · " + nAll + "건 · "
         + (taxed ? "부가가치세 별도 표기 (공급가액 " + L.money(supplyAll)
           + "원 + 세액 " + L.money(taxAll) + "원)" : "면세")
-      : "단가를 넣으면 금액이 계산됩니다 · 총 " + L.num(qtyAll) + "㎡ · " + nAll + "건";
+      : "단가를 넣으면 금액이 계산됩니다 · 총 " + L.qtySummary(byUnit) + " · " + nAll + "건";
 
     elBaseNote.textContent = L.baseNote(base);
   }

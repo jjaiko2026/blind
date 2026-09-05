@@ -182,10 +182,30 @@
     });
     // 0.1 단위 값을 더하다 생기는 부동소수 찌꺼기를 털어 낸다.
     order.forEach(function (k) {
-      map[k].qty = Math.round(map[k].qty * 100) / 100;
-      map[k].raw = Math.round(map[k].raw * 100) / 100;
+      var e = map[k];
+      e.qty = Math.round(e.qty * 100) / 100;
+      e.raw = Math.round(e.raw * 100) / 100;
+      e.unit = unitOf(e.prod);
+      e.bill = billQty(e);
     });
     return order.map(function (k) { return map[k]; });
+  }
+
+  // 커튼은 헤베가 아니라 조(개) 단위로 산정한다.
+  function unitOf(prod) { return prodKind(prod) === "커튼" ? "개" : "㎡"; }
+
+  // 그 줄에 실제로 값을 매기는 수량 — 커튼은 건수, 블라인드는 헤베.
+  function billQty(e) { return unitOf(e.prod) === "개" ? e.n : e.qty; }
+
+  function qtyText(value, unit) {
+    return (unit === "개" ? String(Math.round(value)) : num(value)) + " " + unit;
+  }
+
+  // 단위가 섞이므로 합계는 단위별로 따로 적는다.
+  function qtySummary(byUnit) {
+    return Object.keys(byUnit).map(function (u) {
+      return qtyText(byUnit[u], u);
+    }).join("  ·  ") || "—";
   }
 
   function specOf(e, mode) {
@@ -207,6 +227,7 @@
     hangulAmount: hangulAmount, priceValue: priceValue, attr: attr,
     parseDim: parseDim, guessProd: guessProd, prodKind: prodKind,
     readBase: readBase, load: load,
-    usedArea: usedArea, aggregate: aggregate, specOf: specOf, baseNote: baseNote
+    usedArea: usedArea, aggregate: aggregate, specOf: specOf, baseNote: baseNote,
+    unitOf: unitOf, qtyText: qtyText, qtySummary: qtySummary
   };
 })(window);
