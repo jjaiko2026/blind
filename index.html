@@ -307,7 +307,11 @@ tr.based .area .a-use{color:var(--clay)}
   thead{display:table-header-group}   /* 장이 넘어가도 머리글이 다시 찍힌다 */
   tfoot{display:table-row-group}      /* 합계는 되풀이하지 않고 표 끝에서 한 번만 */
   tr{break-inside:avoid;page-break-inside:avoid}
-  th{padding:3px 8px;font-size:7.5pt;color:#000;border-bottom:.8pt solid #000}
+  /* 칸 이름은 종이에서도 데이터보다 확실히 진하게 — 옅은 띠와 굵은 밑줄로 세운다.
+     띠가 빠져도 글자만으로 읽히도록 굵기와 크기를 함께 올린다. */
+  th{padding:4px 8px;font-size:8.5pt;font-weight:700;color:#000;
+    background:#e6e6e6;border-bottom:1.2pt solid #000;
+    -webkit-print-color-adjust:exact;print-color-adjust:exact}
   td{padding:2.5px 8px;border-bottom:.35pt solid #c9c9c9}
   .loc{font-size:8.8pt}
   .rem{font-size:8.5pt;color:#000}
