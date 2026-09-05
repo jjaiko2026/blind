@@ -217,6 +217,33 @@ footer{margin-top:48px;padding-top:16px;border-top:1px solid var(--rule);
 }
 @media (prefers-reduced-motion:reduce){*{animation:none !important;transition:none !important}}
 
+/* --- 헤베 기준 --- */
+.basis{border:1px solid var(--rule);background:var(--surface);padding:14px 16px;margin:-18px 0 34px}
+.basis-top{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+.basis-top h2{margin:0;font-size:13px;font-weight:600;letter-spacing:.06em;color:var(--ink2)}
+.basis-formula{font-family:"IBM Plex Mono",monospace;font-size:11.5px;color:var(--ink3)}
+.basis-fields{display:flex;gap:20px;align-items:center;flex-wrap:wrap}
+.basis-fields label{display:flex;align-items:center;gap:7px;font-size:13px;color:var(--ink2)}
+.basis-fields input{
+  font-family:"IBM Plex Mono",monospace;font-size:14px;font-variant-numeric:tabular-nums;
+  width:78px;padding:4px 8px;border:1px solid var(--rule2);border-radius:2px;
+  background:var(--paper);color:var(--ink);text-align:right;
+}
+.basis-fields input:focus-visible{outline:2px solid var(--pine);outline-offset:1px}
+.basis-sum{
+  margin:11px 0 0;font-family:"IBM Plex Mono",monospace;font-size:12px;
+  color:var(--ink3);font-variant-numeric:tabular-nums;
+}
+.basis-sum b{color:var(--ink);font-weight:600}
+
+/* 품목 · 적용 헤베 */
+th.prod,td.prod{width:1%;white-space:nowrap}
+.chip.b{background:var(--band);color:var(--ink2)}
+.chip.c{background:var(--clay-bg);color:var(--clay)}
+.a-raw{font-size:11px;color:var(--ink3);margin-right:6px;font-weight:400}
+tr.based .area .a-use{color:var(--clay)}
+tfoot .a-raw{font-size:11px}
+
 /* --- 인쇄 / PDF 출력 --- */
 .print-only{display:none}
 
@@ -231,6 +258,13 @@ footer{margin-top:48px;padding-top:16px;border-top:1px solid var(--rule);
 
   /* 화면에서만 쓰는 조작부는 종이에 싣지 않는다 */
   nav,.prog,.gtoggle,.screen-only{display:none !important}
+  .basis{display:none}
+  body.has-base .basis{display:block;border:none;border-left:2pt solid #000;
+    padding:6px 12px;margin:0 0 14px}
+  .basis-top,.basis-fields{display:none}
+  .basis-sum{margin:0;font-size:9pt;color:#000}
+  .a-raw{font-size:7.5pt;color:#555}
+  tr.based .area .a-use{color:#000;font-weight:600}
 
   .mast{padding:0 0 9px;border-bottom:1.4pt solid #000}
   h1{font-size:20pt}
@@ -310,6 +344,7 @@ footer{margin-top:48px;padding-top:16px;border-top:1px solid var(--rule);
     <span>총 실측 <b>299건</b></span>
     <span>치수 <b>가로 × 세로</b></span>
     <span class="print-only">확인 완료 <b id="printDone">0 / 0</b></span>
+    <span class="print-only" id="printBase" hidden></span>
   </div>
 </header>
 
@@ -323,7 +358,7 @@ footer{margin-top:48px;padding-top:16px;border-top:1px solid var(--rule);
   <div><dt>2층</dt><dd>74<small>건</small></dd></div>
   <div><dt>3층</dt><dd>86<small>건</small></dd></div>
   <div><dt>4층</dt><dd>70<small>건</small></dd></div>
-  <div><dt>총 면적</dt><dd>785<small>㎡</small></dd></div>
+  <div><dt>총 면적</dt><dd><span id="totalArea">785</span><small>㎡</small></dd></div>
 </dl>
 
 <section class="prog">
@@ -341,6 +376,19 @@ footer{margin-top:48px;padding-top:16px;border-top:1px solid var(--rule);
   </div>
 </section>
 
+<section class="basis">
+  <div class="basis-top">
+    <h2>기본 헤베</h2>
+    <span class="basis-formula">가로(cm) × 세로(cm) ÷ 10,000 = 헤베(㎡)</span>
+  </div>
+  <div class="basis-fields">
+    <label>블라인드 <input type="number" id="baseBlind" min="0" step="0.1" value="0" inputmode="decimal"> ㎡</label>
+    <label>커튼 <input type="number" id="baseCurtain" min="0" step="0.1" value="0" inputmode="decimal"> ㎡</label>
+    <button type="button" class="btn" id="baseReset">기준 해제</button>
+  </div>
+  <p class="basis-sum" id="basisSum"></p>
+</section>
+
 <section class="legend">
   <h2>표기 읽는 법</h2>
   <ul>
@@ -350,7 +398,9 @@ footer{margin-top:48px;padding-top:16px;border-top:1px solid var(--rule);
     <li><code>줄</code> — 조작 줄 길이</li>
     <li><code>오목창</code> — 커튼박스 없이 창틀 안쪽 실측</li>
     <li><code>롤</code> / <code>커튼</code> — 지정된 제품 형태</li>
-    <li class="screen-only">위치·치수·면적·줄·비고 칸은 클릭해서 바로 고칠 수 있고, 함께 보는 모두에게 저장됩니다</li>
+    <li><span class="chip b">블</span> / <span class="chip c">커</span> — 품목, <span class="screen-only">칸을 클릭하면 서로 바뀝니다</span><span class="print-only">블라인드 / 커튼</span></li>
+    <li><code>면적</code> — 치수에서 자동 계산, 기본 헤베보다 작으면 기본 헤베로 올려 잡습니다</li>
+    <li class="screen-only">위치·치수·줄·비고 칸은 클릭해서 바로 고칠 수 있고, 함께 보는 모두에게 저장됩니다</li>
     <li>치수 단위는 원문 미표기 (cm 기준 추정)</li>
   </ul>
 </section>
@@ -946,6 +996,7 @@ footer{margin-top:48px;padding-top:16px;border-top:1px solid var(--rule);
 
   var STORAGE = "uiryeong-checks-v2";
   var ROWS_STORAGE = "uiryeong-rows-v1";
+  var BASE_STORAGE = "uiryeong-base-v1";
   var db = null;
   var checked = new Set();
   var boxes = new Map();   // id -> {box, row}
@@ -966,6 +1017,13 @@ footer{margin-top:48px;padding-top:16px;border-top:1px solid var(--rule);
   var elPrint = document.getElementById("printPage");
   var elPrintDone = document.getElementById("printDone");
   var elPrintedAt = document.getElementById("printedAt");
+  var elBaseBlind = document.getElementById("baseBlind");
+  var elBaseCurtain = document.getElementById("baseCurtain");
+  var elBaseReset = document.getElementById("baseReset");
+  var elBasisSum = document.getElementById("basisSum");
+  var elTotalArea = document.getElementById("totalArea");
+  var elPrintBase = document.getElementById("printBase");
+  var base = { blind: 0, curtain: 0 };
 
   function status(t) { elStatus.textContent = t; }
 
@@ -994,7 +1052,8 @@ footer{margin-top:48px;padding-top:16px;border-top:1px solid var(--rule);
       area: entry.area ? entry.area.textContent.trim() : "",
       dir: dirTextOf(entry.dir),
       line: entry.line ? entry.line.textContent.trim() : "",
-      rem: entry.rem ? entry.rem.textContent.trim() : ""
+      rem: entry.rem ? entry.rem.textContent.trim() : "",
+      prod: prodTextOf(entry.prod)
     };
   }
 
@@ -1002,10 +1061,10 @@ footer{margin-top:48px;padding-top:16px;border-top:1px solid var(--rule);
     if (!data) return;
     if (typeof data.loc === "string" && entry.loc) entry.loc.textContent = data.loc;
     if (typeof data.dim === "string" && entry.dim) entry.dim.textContent = data.dim;
-    if (typeof data.area === "string" && entry.area) entry.area.textContent = data.area;
     if (typeof data.line === "string" && entry.line) entry.line.textContent = data.line;
     if (typeof data.rem === "string" && entry.rem) entry.rem.textContent = data.rem;
     if (typeof data.dir === "string" && entry.dir) renderDir(entry.dir, data.dir);
+    if (typeof data.prod === "string" && entry.prod) renderProd(entry.prod, data.prod);
   }
 
   function cacheRows() {
@@ -1017,6 +1076,7 @@ footer{margin-top:48px;padding-top:16px;border-top:1px solid var(--rule);
     var data = readRow(entry);
     rowCache[id] = data;
     cacheRows();
+    recompute();
     if (!db) return;
     db.doc("rows/" + id).set(data).catch(function () {
       status("저장 실패 — 이 기기에만 남습니다");
@@ -1031,11 +1091,30 @@ footer{margin-top:48px;padding-top:16px;border-top:1px solid var(--rule);
       area: tr.querySelector(".area"),
       dir: tr.querySelector(".dir"),
       line: tr.querySelector(".line"),
-      rem: tr.querySelector(".rem")
+      rem: tr.querySelector(".rem"),
+      prod: tr.querySelector("td.prod")
     };
     rowMap.set(id, entry);
 
-    [entry.loc, entry.dim, entry.area, entry.line, entry.rem].forEach(function (td) {
+    // 품목은 노트 표기에서 고르고, 칸을 눌러 바꾼다.
+    if (entry.prod && !entry.prod.querySelector(".chip")) renderProd(entry.prod, guessProd(tr));
+    if (entry.prod) {
+      entry.prod.classList.add("editable", "dir-toggle");
+      entry.prod.tabIndex = 0;
+      entry.prod.setAttribute("role", "button");
+      entry.prod.setAttribute("aria-label", "품목 전환 (블라인드 / 커튼)");
+      var flip = function () {
+        renderProd(entry.prod, prodTextOf(entry.prod) === "커튼" ? "블라인드" : "커튼");
+        saveRow(id, entry);
+      };
+      entry.prod.addEventListener("click", flip);
+      entry.prod.addEventListener("keydown", function (e) {
+        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); flip(); }
+      });
+    }
+
+    // 면적은 치수에서 계산하므로 직접 고치지 않는다.
+    [entry.loc, entry.dim, entry.line, entry.rem].forEach(function (td) {
       if (!td) return;
       td.contentEditable = "true";
       td.spellcheck = false;
@@ -1081,12 +1160,19 @@ footer{margin-top:48px;padding-top:16px;border-top:1px solid var(--rule);
         th.className = "ck";
         th.textContent = "확인";
         tr.insertBefore(th, tr.firstChild);
+        var thp = document.createElement("th");
+        thp.className = "prod";
+        thp.textContent = "품목";
+        tr.insertBefore(thp, tr.children[1] || null);
       });
       // 합계 행(tfoot)에도 빈 칸을 넣어야 열이 어긋나지 않는다.
       grp.querySelectorAll("tbody tr, tfoot tr").forEach(function (tr) {
         var td = document.createElement("td");
         td.className = "ck";
         tr.insertBefore(td, tr.firstChild);
+        var tdp = document.createElement("td");
+        tdp.className = "prod";
+        tr.insertBefore(tdp, tr.children[1] || null);
       });
 
       var ids = [];
@@ -1194,6 +1280,163 @@ footer{margin-top:48px;padding-top:16px;border-top:1px solid var(--rule);
     render();
     cache();
     push(ids, false);
+  });
+
+  /* ---- 헤베 계산 ----
+     가로(cm) x 세로(cm) / 10,000 = 헤베(m2).
+     품목별 기본 헤베가 있으면 실측 헤베가 그보다 작은 건은 기본 헤베로 올려 잡는다. */
+  function parseDim(text) {
+    var m = /^([0-9]+(?:\.[0-9]+)?)\s*[×xX*]\s*([0-9]+(?:\.[0-9]+)?)$/
+      .exec(String(text == null ? "" : text).replace(/\s+/g, " ").trim());
+    return m ? { w: parseFloat(m[1]), h: parseFloat(m[2]) } : null;
+  }
+
+  function rawAreaOf(entry) {
+    var d = parseDim(entry.dim ? entry.dim.textContent : "");
+    return d ? d.w * d.h / 10000 : null;
+  }
+
+  function prodTextOf(td) {
+    if (!td) return "블라인드";
+    return td.querySelector(".chip.c") ? "커튼" : "블라인드";
+  }
+
+  function renderProd(td, value) {
+    if (!td) return;
+    td.innerHTML = value === "커튼"
+      ? '<span class="chip c">커</span>'
+      : '<span class="chip b">블</span>';
+  }
+
+  // 노트에 적힌 제품 표기에서 품목 기본값을 고른다. "커튼박스"는 제품이 아니라 창틀 이야기다.
+  function guessProd(tr) {
+    var t = (tr.textContent || "").replace(/커튼박스/g, "");
+    if (/롤/.test(t)) return "블라인드";
+    if (/커튼/.test(t)) return "커튼";
+    return "블라인드";
+  }
+
+  function baseFor(prod) {
+    return prod === "커튼" ? base.curtain : base.blind;
+  }
+
+  function fmt2(n) { return (Math.round(n * 100) / 100).toFixed(2); }
+
+  function areaHtml(used, raw) {
+    var html = "";
+    if (raw != null && used > raw + 0.0001) html += '<span class="a-raw">' + fmt2(raw) + ' →</span>';
+    return html + '<span class="a-use">' + fmt2(used) + '</span>';
+  }
+
+  /* ---- 표 전체를 다시 계산해 화면에 반영 ---- */
+  function recompute() {
+    var allRaw = 0, allUse = 0, lifted = 0;
+
+    groups.forEach(function (g) {
+      var gRaw = 0, gUse = 0, n = 0;
+      g.ids.forEach(function (id) {
+        var entry = rowMap.get(id);
+        if (!entry || !entry.area) return;
+        n++;
+        var raw = rawAreaOf(entry);
+        if (raw == null) { entry.tr.classList.remove("based"); return; }
+        var used = Math.max(raw, baseFor(prodTextOf(entry.prod)));
+        var up = used > raw + 0.0001;
+        if (up) lifted++;
+        entry.tr.classList.toggle("based", up);
+        entry.area.innerHTML = areaHtml(used, raw);
+        entry.area.title = up
+          ? "실측 " + fmt2(raw) + "㎡ · 기본 헤베 " + fmt2(used) + "㎡ 적용"
+          : "실측 " + fmt2(raw) + "㎡";
+        gRaw += raw; gUse += used;
+      });
+      allRaw += gRaw; allUse += gUse;
+
+      var foot = g.el.querySelector("tfoot tr");
+      if (foot) {
+        var fLoc = foot.querySelector(".loc");
+        var fArea = foot.querySelector(".area");
+        if (fLoc) fLoc.textContent = "합계 " + n + "건";
+        if (fArea) fArea.innerHTML = areaHtml(gUse, gRaw);
+      }
+    });
+
+    floors.forEach(function (f) {
+      if (!f.span || !f.ids.length) return;
+      var sum = 0;
+      f.ids.forEach(function (id) {
+        var entry = rowMap.get(id);
+        if (!entry) return;
+        var raw = rawAreaOf(entry);
+        if (raw == null) return;
+        sum += Math.max(raw, baseFor(prodTextOf(entry.prod)));
+      });
+      f.area = sum;
+      f.base = f.ids.length + "건 · " + sum.toFixed(1) + "㎡";
+    });
+
+    if (elTotalArea) elTotalArea.textContent = allUse.toFixed(1);
+
+    if (elBasisSum) {
+      var txt = "실측 합계 " + allRaw.toFixed(2) + "㎡";
+      if (base.blind > 0 || base.curtain > 0) {
+        txt += "  →  적용 합계 " + allUse.toFixed(2) + "㎡ (기본 헤베 적용 " + lifted + "건, +"
+          + (allUse - allRaw).toFixed(2) + "㎡)";
+        elBasisSum.innerHTML = "실측 합계 " + allRaw.toFixed(2) + "㎡ → 적용 합계 <b>"
+          + allUse.toFixed(2) + "㎡</b> · 기본 헤베 적용 " + lifted + "건 (+"
+          + (allUse - allRaw).toFixed(2) + "㎡)";
+      } else {
+        elBasisSum.innerHTML = "실측 합계 <b>" + allRaw.toFixed(2)
+          + "㎡</b> · 기본 헤베를 넣으면 그보다 작은 건은 기본 헤베로 계산합니다";
+      }
+    }
+
+    document.body.classList.toggle("has-base", base.blind > 0 || base.curtain > 0);
+
+    if (elPrintBase) {
+      if (base.blind > 0 || base.curtain > 0) {
+        elPrintBase.hidden = false;
+        elPrintBase.innerHTML = "기본 헤베 <b>블라인드 " + fmt2(base.blind)
+          + "㎡ · 커튼 " + fmt2(base.curtain) + "㎡</b>";
+      } else {
+        elPrintBase.hidden = true;
+      }
+    }
+
+    render();
+  }
+
+  /* ---- 기본 헤베 입력 ---- */
+  function readBaseInputs() {
+    var b = parseFloat(elBaseBlind && elBaseBlind.value);
+    var c = parseFloat(elBaseCurtain && elBaseCurtain.value);
+    base.blind = isFinite(b) && b > 0 ? b : 0;
+    base.curtain = isFinite(c) && c > 0 ? c : 0;
+  }
+
+  function writeBaseInputs() {
+    if (elBaseBlind) elBaseBlind.value = base.blind ? String(base.blind) : "0";
+    if (elBaseCurtain) elBaseCurtain.value = base.curtain ? String(base.curtain) : "0";
+  }
+
+  function saveBase() {
+    try { localStorage.setItem(BASE_STORAGE, JSON.stringify(base)); } catch (e) { /* 무시 */ }
+    if (db) db.doc("settings/base").set({ blind: base.blind, curtain: base.curtain }).catch(function () {});
+  }
+
+  function onBaseChange() {
+    readBaseInputs();
+    recompute();
+    saveBase();
+  }
+
+  if (elBaseBlind) elBaseBlind.addEventListener("input", onBaseChange);
+  if (elBaseCurtain) elBaseCurtain.addEventListener("input", onBaseChange);
+  if (elBaseReset) elBaseReset.addEventListener("click", function () {
+    base.blind = 0; base.curtain = 0;
+    writeBaseInputs();
+    recompute();
+    saveBase();
   });
 
   /* ---- 인쇄 / PDF 저장 ---- */
@@ -1317,20 +1560,25 @@ footer{margin-top:48px;padding-top:16px;border-top:1px solid var(--rule);
   }
 
   function buildExportRows() {
-    var out = [["층", "구역", "확인", "위치", "치수", "면적 ㎡", "방향", "줄", "비고"]];
+    var out = [["층", "구역", "확인", "품목", "위치", "치수", "실측 ㎡", "적용 ㎡", "방향", "줄", "비고"]];
     rowMap.forEach(function (entry, id) {
       var floorEl = entry.tr.closest(".floor");
       var grpEl = entry.tr.closest(".grp");
       var floorH2 = floorEl ? floorEl.querySelector(".floor-head h2") : null;
       var grpH3 = grpEl ? grpEl.querySelector(".grp-head h3") : null;
       var box = boxes.get(id);
+      var prod = prodTextOf(entry.prod);
+      var raw = rawAreaOf(entry);
+      var used = raw == null ? null : Math.max(raw, baseFor(prod));
       out.push([
         floorH2 ? floorH2.textContent.trim() : "",
         grpH3 ? grpH3.textContent.trim() : "",
         box && box.box.checked ? "완료" : "",
+        prod,
         entry.loc ? entry.loc.textContent.trim() : "",
         entry.dim ? entry.dim.textContent.trim() : "",
-        entry.area ? entry.area.textContent.trim() : "",
+        raw == null ? "" : fmt2(raw),
+        used == null ? "" : fmt2(used),
         dirTextOf(entry.dir),
         entry.line ? entry.line.textContent.trim() : "",
         entry.rem ? entry.rem.textContent.trim() : ""
@@ -1438,7 +1686,16 @@ footer{margin-top:48px;padding-top:16px;border-top:1px solid var(--rule);
     if (rowCache[id]) writeRow(entry, rowCache[id]);
   });
 
-  render();
+  try {
+    var rawBase = JSON.parse(localStorage.getItem(BASE_STORAGE) || "null");
+    if (rawBase) {
+      base.blind = parseFloat(rawBase.blind) > 0 ? parseFloat(rawBase.blind) : 0;
+      base.curtain = parseFloat(rawBase.curtain) > 0 ? parseFloat(rawBase.curtain) : 0;
+    }
+  } catch (e) { /* 무시 */ }
+  writeBaseInputs();
+
+  recompute();
 
   if (!(window.claude && window.claude.use)) {
     status("이 기기에만 저장됨");
@@ -1472,6 +1729,23 @@ footer{margin-top:48px;padding-top:16px;border-top:1px solid var(--rule);
       status("동기화 끊김 — 이 기기에만 저장됩니다");
     });
 
+    d.collection("settings").onSnapshot(function (snap) {
+      snap.docs.forEach(function (doc) {
+        if (doc.id !== "base") return;
+        var v = doc.data() || {};
+        var nb = parseFloat(v.blind) > 0 ? parseFloat(v.blind) : 0;
+        var nc = parseFloat(v.curtain) > 0 ? parseFloat(v.curtain) : 0;
+        if (nb === base.blind && nc === base.curtain) return;
+        // 입력 중인 칸을 빼앗지 않는다.
+        if (document.activeElement === elBaseBlind || document.activeElement === elBaseCurtain) return;
+        base.blind = nb;
+        base.curtain = nc;
+        writeBaseInputs();
+        recompute();
+        try { localStorage.setItem(BASE_STORAGE, JSON.stringify(base)); } catch (e) { /* 무시 */ }
+      });
+    }, function () { /* 기준은 이 기기 값을 쓴다 */ });
+
     d.collection("rows").onSnapshot(function (snap) {
       var seen = {};
       snap.docs.forEach(function (doc) {
@@ -1481,6 +1755,8 @@ footer{margin-top:48px;padding-top:16px;border-top:1px solid var(--rule);
         if (data) rowCache[doc.id] = data;
         if (entry && data && entry.tr.dataset.editing !== "1") writeRow(entry, data);
       });
+
+      recompute();
 
       if (!rowsMerged) {
         rowsMerged = true;
