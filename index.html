@@ -216,6 +216,84 @@ footer{margin-top:48px;padding-top:16px;border-top:1px solid var(--rule);
   td,th{padding-left:10px;padding-right:10px}
 }
 @media (prefers-reduced-motion:reduce){*{animation:none !important;transition:none !important}}
+
+/* --- 인쇄 / PDF 출력 --- */
+.print-only{display:none}
+
+@media print{
+  @page{size:A4 portrait;margin:12mm 11mm 13mm}
+
+  /* 종이에서는 잉크를 아끼고 선으로만 구분한다 */
+  html,body{background:#fff}
+  body{font-size:9.5pt;line-height:1.34;color:#000}
+  .wrap{max-width:none;padding:0}
+  .print-only{display:inline}
+
+  /* 화면에서만 쓰는 조작부는 종이에 싣지 않는다 */
+  nav,.prog,.gtoggle,.screen-only{display:none !important}
+
+  .mast{padding:0 0 9px;border-bottom:1.4pt solid #000}
+  h1{font-size:20pt}
+  .sub{font-size:9pt;max-width:none;margin-top:6px}
+  .meta{margin-top:9px;gap:2px 18px;font-size:8.5pt;color:#000}
+
+  .tally{margin:12px 0 14px;grid-template-columns:repeat(6,1fr);
+    background:#000;border-color:#000;gap:.5pt}
+  .tally div{padding:5px 8px}
+  .tally dt{font-size:7.5pt;margin-bottom:2px;color:#000}
+  .tally dd{font-size:13pt}
+
+  .legend{margin:0 0 14px;padding:8px 12px;border-left:2pt solid #000}
+  .legend h2{color:#000}
+  .legend ul{gap:3px;font-size:8.5pt;color:#000}
+  .legend code{background:none;border:.4pt solid #888;padding:0 3px}
+
+  /* 층마다 새 장에서 시작한다 */
+  .floor{margin:0;break-before:page;page-break-before:always}
+  .floor:first-of-type{break-before:auto;page-break-before:auto}
+  .floor-head{margin-bottom:9px;padding-bottom:5px;border-bottom:.8pt solid #000}
+  .floor-head h2{font-size:15pt}
+  .floor-head span{font-size:8.5pt;color:#000}
+
+  .grp{margin:0 0 11px;border:.4pt solid #777;box-shadow:none}
+  .grp-head{padding:4px 8px;background:none;border-bottom:.4pt solid #777;
+    break-after:avoid;page-break-after:avoid}
+  .grp-head h3{font-size:10pt}
+  .grp.all-done .grp-head{background:none}
+  .gwrap{gap:8px}
+  .gcount{font-size:8pt;color:#000}
+  .badge{font-size:8pt;padding:0 5px;border-color:#777;
+    background:none !important;color:#000 !important}
+
+  .scroll{overflow:visible !important}
+  table{font-size:9pt}
+  thead{display:table-header-group}   /* 장이 넘어가도 머리글이 다시 찍힌다 */
+  tr{break-inside:avoid;page-break-inside:avoid}
+  th{padding:3px 8px;font-size:7.5pt;color:#000;border-bottom:.8pt solid #000}
+  td{padding:2.5px 8px;border-bottom:.35pt solid #c9c9c9}
+  .loc{font-size:8.8pt}
+  .rem{font-size:8.5pt;color:#000}
+  .area,.line{color:#000}
+  tfoot td{background:none;border-top:.8pt solid #000;padding:4px 8px}
+  tfoot .loc{color:#000}
+
+  /* 색으로만 나뉘던 표시를 흑백에서도 읽히게 바꾼다 */
+  .chip{background:none !important;color:#000 !important;padding:0;font-size:9pt}
+  tr.done,tr.flag{background:none !important}
+  tr.flag .rem{color:#000;font-weight:600}
+  tr.flag .rem::before{content:"※ "}
+  .editable{background:none !important}
+  input[type=checkbox]{width:11px;height:11px;
+    -webkit-print-color-adjust:exact;print-color-adjust:exact}
+
+  .check{break-before:page;page-break-before:always;
+    border:1pt solid #000;background:none;padding:12px 14px}
+  .check h2{color:#000;font-size:16pt}
+  .check ul{font-size:9pt;color:#000}
+
+  footer{margin-top:18px;padding-top:8px;border-top:.5pt solid #000;
+    font-size:8pt;color:#000}
+}
 </style>
 </head>
 <body>
@@ -231,6 +309,7 @@ footer{margin-top:48px;padding-top:16px;border-top:1px solid var(--rule);
     <span>대상 <b>지상 1~4층</b></span>
     <span>총 실측 <b>299건</b></span>
     <span>치수 <b>가로 × 세로</b></span>
+    <span class="print-only">확인 완료 <b id="printDone">0 / 0</b></span>
   </div>
 </header>
 
@@ -258,18 +337,20 @@ footer{margin-top:48px;padding-top:16px;border-top:1px solid var(--rule);
     <label><input type="checkbox" id="onlyTodo"> 남은 항목만 보기</label>
     <button type="button" class="btn" id="resetAll">전체 해제</button>
     <button type="button" class="btn" id="downloadXlsx">엑셀로 내려받기</button>
+    <button type="button" class="btn" id="printPage">인쇄 · PDF로 저장</button>
   </div>
 </section>
 
 <section class="legend">
   <h2>표기 읽는 법</h2>
   <ul>
-    <li><code>확인</code> — 체크는 저장되어 다시 열어도 남습니다</li>
-    <li><span class="chip l">좌</span> / <span class="chip r">우</span> — 조작 줄 방향, 칸을 클릭하면 좌 → 우 → — 순으로 바뀝니다</li>
+    <li class="screen-only"><code>확인</code> — 체크는 저장되어 다시 열어도 남습니다</li>
+    <li class="screen-only"><span class="chip l">좌</span> / <span class="chip r">우</span> — 조작 줄 방향, 칸을 클릭하면 좌 → 우 → — 순으로 바뀝니다</li>
+    <li class="print-only"><span class="chip l">좌</span> / <span class="chip r">우</span> — 조작 줄 방향</li>
     <li><code>줄</code> — 조작 줄 길이</li>
     <li><code>오목창</code> — 커튼박스 없이 창틀 안쪽 실측</li>
     <li><code>롤</code> / <code>커튼</code> — 지정된 제품 형태</li>
-    <li>위치·치수·면적·줄·비고 칸은 클릭해서 바로 고칠 수 있고, 함께 보는 모두에게 저장됩니다</li>
+    <li class="screen-only">위치·치수·면적·줄·비고 칸은 클릭해서 바로 고칠 수 있고, 함께 보는 모두에게 저장됩니다</li>
     <li>치수 단위는 원문 미표기 (cm 기준 추정)</li>
   </ul>
 </section>
@@ -855,7 +936,7 @@ footer{margin-top:48px;padding-top:16px;border-top:1px solid var(--rule);
   </div>
 </section>
 
-<footer>의령경찰서 신축현장 · 창호 실측 대장 · 실측일 9/3 (목) · 엑셀 원본에서 생성 · 표의 값은 직접 수정할 수 있습니다</footer>
+<footer>의령경찰서 신축현장 · 창호 실측 대장 · 실측일 9/3 (목) · 엑셀 원본에서 생성 · 표의 값은 직접 수정할 수 있습니다<span class="print-only" id="printedAt"></span></footer>
 
 </div>
 
@@ -882,6 +963,9 @@ footer{margin-top:48px;padding-top:16px;border-top:1px solid var(--rule);
   var elOnly = document.getElementById("onlyTodo");
   var elReset = document.getElementById("resetAll");
   var elDownload = document.getElementById("downloadXlsx");
+  var elPrint = document.getElementById("printPage");
+  var elPrintDone = document.getElementById("printDone");
+  var elPrintedAt = document.getElementById("printedAt");
 
   function status(t) { elStatus.textContent = t; }
 
@@ -1067,6 +1151,7 @@ footer{margin-top:48px;padding-top:16px;border-top:1px solid var(--rule);
       f.span.textContent = f.base + " · 확인 " + n + "/" + f.ids.length;
     });
     elNum.textContent = done + " / " + total;
+    if (elPrintDone) elPrintDone.textContent = done + " / " + total;
     elFill.style.width = total ? (done / total * 100) + "%" : "0%";
   }
 
@@ -1110,6 +1195,29 @@ footer{margin-top:48px;padding-top:16px;border-top:1px solid var(--rule);
     cache();
     push(ids, false);
   });
+
+  /* ---- 인쇄 / PDF 저장 ---- */
+  function stampPrintTime() {
+    if (!elPrintedAt) return;
+    var d = new Date();
+    function p2(n) { return (n < 10 ? "0" : "") + n; }
+    elPrintedAt.textContent = " · 출력 " +
+      d.getFullYear() + "-" + p2(d.getMonth() + 1) + "-" + p2(d.getDate()) +
+      " " + p2(d.getHours()) + ":" + p2(d.getMinutes());
+  }
+
+  if (elPrint) {
+    elPrint.addEventListener("click", function () {
+      // 편집 중인 칸이 있으면 값을 먼저 확정하고 찍는다.
+      if (document.activeElement && document.activeElement.isContentEditable) {
+        document.activeElement.blur();
+      }
+      stampPrintTime();
+      window.print();
+    });
+  }
+  // 브라우저 메뉴(Ctrl+P)로 바로 인쇄해도 출력 시각이 남는다.
+  window.addEventListener("beforeprint", stampPrintTime);
 
   /* ---- 엑셀(.xlsx) 내려받기 — 외부 라이브러리 없이 최소 xlsx를 직접 조립한다 ---- */
   var CRC_TABLE = (function () {
