@@ -198,7 +198,7 @@ footer{margin-top:40px;padding-top:14px;border-top:1px solid var(--rule);
 .error{border:1px solid var(--flag);background:#fbeeeb;color:var(--flag);
   padding:14px 18px;margin:22px 0 0;font-size:13.5px}
 
-@media (max-width:720px){
+@media screen and (max-width:720px){
   .parties,.notes{grid-template-columns:1fr}
 }
 @media (prefers-reduced-motion:reduce){*{animation:none !important;transition:none !important}}
@@ -216,7 +216,8 @@ footer{margin-top:40px;padding-top:14px;border-top:1px solid var(--rule);
   h1{font-size:26pt}
   .mast-sub{font-size:9pt;gap:20px;margin-top:9px}
 
-  .parties{margin-top:14px;border-color:#000;background:#000;gap:.5pt}
+  .parties{margin-top:14px;border-color:#000;background:#000;gap:.5pt;
+    grid-template-columns:1fr 1fr}
   .party{padding:9px 11px}
   .party h2{font-size:7.5pt;margin-bottom:7px;color:#000}
   .field{margin-bottom:4px}
@@ -250,7 +251,8 @@ footer{margin-top:40px;padding-top:14px;border-top:1px solid var(--rule);
   tfoot tr.total td{border-top:1pt solid #000}
   tfoot tr.total .sum{font-size:12pt}
 
-  .notes{margin-top:14px;gap:14px;break-inside:avoid}
+  #basisBox{display:none}
+  .notes{margin-top:14px;gap:14px;break-inside:avoid;grid-template-columns:1fr}
   .note-box{padding:9px 12px;border-left:1.5pt solid #000}
   .note-box h2{font-size:8.5pt;color:#000}
   .note-box ul{font-size:8.5pt;color:#000;gap:3px}
@@ -343,7 +345,7 @@ footer{margin-top:40px;padding-top:14px;border-top:1px solid var(--rule);
 </section>
 
 <section class="notes">
-  <div class="note-box">
+  <div class="note-box" id="basisBox">
     <h2>산출 기준</h2>
     <ul id="basisList">
       <li>수량은 실측대장의 확정 치수에서 계산합니다</li>
@@ -427,6 +429,10 @@ footer{margin-top:40px;padding-top:14px;border-top:1px solid var(--rule);
   }
 
   /* ---- 대장 읽기 ---- */
+  // 헤베는 둘째 자리에서 올린다. 부동소수 오차로 3.05가 3.06이 되지 않도록
+  // 아주 작은 값을 먼저 덜어낸다 (실측에서 나올 수 있는 자릿수보다 훨씬 작다).
+  function ceil2(n) { return Math.ceil(n * 100 - 1e-9) / 100; }
+
   function parseDim(text) {
     var m = /^([0-9]+(?:\.[0-9]+)?)\s*[×xX*]\s*([0-9]+(?:\.[0-9]+)?)$/
       .exec(String(text == null ? "" : text).replace(/\s+/g, " ").trim());
@@ -482,7 +488,7 @@ footer{margin-top:40px;padding-top:14px;border-top:1px solid var(--rule);
 
           out.push({
             floor: floorName, group: groupName, loc: loc, dim: dim, rem: rem,
-            prod: prod, raw: d.w * d.h / 10000
+            prod: prod, raw: ceil2(d.w * d.h / 10000)
           });
         });
       });
