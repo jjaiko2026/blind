@@ -263,7 +263,7 @@ tfoot .a-raw{font-size:11px}
   .print-only{display:inline}
 
   /* 화면에서만 쓰는 조작부는 종이에 싣지 않는다 */
-  nav,.prog,.gtoggle,.screen-only{display:none !important}
+  nav,.prog,.legend,.gtoggle,.screen-only{display:none !important}
   .basis{display:none}
   body.has-base .basis{display:block;border:none;border-left:2pt solid #000;
     padding:6px 12px;margin:0 0 14px}
@@ -308,6 +308,7 @@ tfoot .a-raw{font-size:11px}
   .scroll{overflow:visible !important}
   table{font-size:9pt;min-width:0}
   thead{display:table-header-group}   /* 장이 넘어가도 머리글이 다시 찍힌다 */
+  tfoot{display:table-row-group}      /* 합계는 되풀이하지 않고 표 끝에서 한 번만 */
   tr{break-inside:avoid;page-break-inside:avoid}
   th{padding:3px 8px;font-size:7.5pt;color:#000;border-bottom:.8pt solid #000}
   td{padding:2.5px 8px;border-bottom:.35pt solid #c9c9c9}
@@ -1420,8 +1421,9 @@ tfoot .a-raw{font-size:11px}
     if (elPrintBase) {
       if (base.blind > 0 || base.curtain > 0) {
         elPrintBase.hidden = false;
-        elPrintBase.innerHTML = "기본 헤베 <b>블라인드 " + fmt2(base.blind)
-          + "㎡ · 커튼 " + fmt2(base.curtain) + "㎡</b>";
+        var mark = function (v) { return v > 0 ? fmt2(v) + "㎡" : "없음"; };
+        elPrintBase.innerHTML = "기본 헤베 <b>블라인드 " + mark(base.blind)
+          + " · 커튼 " + mark(base.curtain) + "</b>";
       } else {
         elPrintBase.hidden = true;
       }
